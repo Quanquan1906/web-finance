@@ -1,0 +1,4 @@
+pnpm test:ci
+eslint --fix
+pnpm exec lint-staged
+git add .
