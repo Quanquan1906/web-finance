@@ -1,7 +1,7 @@
-import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { NotFound } from '@/pages/not-found';
-import { AppShell } from '@/widgets/app-shell';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { AuthGate } from '../providers/AuthGate';
 
 interface RootRouteContext {
   data: string;
@@ -9,10 +9,10 @@ interface RootRouteContext {
 
 export const Route = createRootRouteWithContext<RootRouteContext>()({
   component: () => (
-    <AppShell>
+    <AuthGate>
       <Outlet />
       <ReactQueryDevtools initialIsOpen={false} />
-    </AppShell>
+    </AuthGate>
   ),
   notFoundComponent: () => <NotFound />
 });
