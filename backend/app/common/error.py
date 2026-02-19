@@ -24,6 +24,16 @@ class BadRequest(BaseErrResp):
         super(BadRequest, self).__init__(400, 'Bad Request', details)
 
 
+class UnauthorizedError(BaseErrResp):
+    def __init__(self, details: list):
+        super(UnauthorizedError, self).__init__(401, 'Unauthorized', details)
+
+
+class NotFoundError(BaseErrResp):
+    def __init__(self, details: list):
+        super(NotFoundError, self).__init__(404, 'Not Found', details)
+
+
 class InternalError(BaseErrResp):
     def __init__(self, details: list):
         super(InternalError, self).__init__(500, 'Internal Error', details)

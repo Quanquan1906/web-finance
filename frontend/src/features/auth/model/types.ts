@@ -1,17 +1,29 @@
-import type { User } from '@/entities/user';
+export type Role = "USER" | "ADMIN";
 
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
+export interface AuthUser {
+  id: string;
+  email: string;
+  name?: string | null;
+  roles: Role[];
 }
 
-export interface LoginCredentials {
+export interface LoginPayload {
   email: string;
   password: string;
 }
 
+export interface RegisterPayload {
+  email: string;
+  password: string;
+  name?: string;
+}
+
 export interface LoginResponse {
-  user: User;
-  token: string;
+  accessToken: string;
+  refreshToken: string;
+  user: AuthUser;
+}
+
+export interface RefreshResponse {
+  accessToken: string;
 }

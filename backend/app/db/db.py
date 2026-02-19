@@ -18,14 +18,24 @@ async def get_db() -> AsyncIOMotorClient:
 async def connect_and_init_db():
     global db_client
     try:
-        db_client = AsyncIOMotorClient(
-            Config.app_settings.get('mongodb_url'),
-            username=Config.app_settings.get('db_username'),
-            password=Config.app_settings.get('db_password'),
-            maxPoolSize=Config.app_settings.get('max_db_conn_count'),
-            minPoolSize=Config.app_settings.get('min_db_conn_count'),
-            uuidRepresentation="standard",
-        )
+        if Config.mongo_uri:
+            # Full URI (e.g. Atlas mongodb+srv://...) — credentials are embedded
+            db_client = AsyncIOMotorClient(
+                Config.mongo_uri,
+                maxPoolSize=Config.app_settings.get('max_db_conn_count'),
+                minPoolSize=Config.app_settings.get('min_db_conn_count'),
+                uuidRepresentation="standard",
+            )
+        else:
+            # Individual host + credentials
+            db_client = AsyncIOMotorClient(
+                Config.app_settings.get('mongodb_url'),
+                username=Config.app_settings.get('db_username'),
+                password=Config.app_settings.get('db_password'),
+                maxPoolSize=Config.app_settings.get('max_db_conn_count'),
+                minPoolSize=Config.app_settings.get('min_db_conn_count'),
+                uuidRepresentation="standard",
+            )
         logging.info('Connected to mongo.')
     except Exception as e:
         logging.exception(f'Could not connect to mongo: {e}')

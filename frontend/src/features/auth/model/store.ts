@@ -1,42 +1,66 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { LoginCredentials } from './types';
-import { User } from '@/entities/user';
-import { authApi } from '../api/authApi';
+import { authApi } from '../api/auth.api';
+import { AuthUser, LoginPayload } from './types';
+import { session } from '@/shared/auth/session';
 
-interface AuthStore {
-  user: User | null;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
+type AuthState = {
+  user: AuthUser | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  /** true once hydrate() has been called — useful for sidebar to avoid flicker */
+  hydrated: boolean;
+
+  hydrate: () => void;
+  login: (payload: LoginPayload) => Promise<void>;
   logout: () => Promise<void>;
-}
+  setAccessToken: (token: string | null) => void;
+};
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      isLoading: false,
+export const useAuthStore = create<AuthState>((set, get) => ({
+  user: null,
+  accessToken: null,
+  refreshToken: null,
+  hydrated: false,
 
-      login: async (credentials) => {
-        set({ isLoading: true });
-        try {
-          const { data } = await authApi.login(credentials);
-          const { user, token } = data;
-          localStorage.setItem('token', token);
-          set({ user, isLoading: false });
-        } catch (error) {
-          set({ isLoading: false });
-          throw error;
-        }
-      },
+  hydrate: () => {
+    set({
+      accessToken: session.getAccessToken(),
+      refreshToken: session.getRefreshToken(),
+      // AuthUser satisfies SessionUser (same shape), safe cast
+      user: session.getUser() as AuthUser | null,
+      hydrated: true
+    });
+  },
 
-      logout: async () => {
-        set({ isLoading: true });
-        await authApi.logout();
-        localStorage.removeItem('token');
-        set({ user: null, isLoading: false });
-      },
-    }),
-    { name: 'auth-storage', partialize: (state) => ({ user: state.user }) }
-  )
-);
+  setAccessToken: (token) => {
+    session.setAccessToken(token);
+    set({ accessToken: token });
+  },
+
+  login: async (payload) => {
+    const res = await authApi.login(payload);
+
+    session.setAccessToken(res.accessToken);
+    session.setRefreshToken(res.refreshToken);
+    session.setUser(res.user);
+
+    set({
+      accessToken: res.accessToken,
+      refreshToken: res.refreshToken,
+      user: res.user
+    });
+  },
+
+  logout: async () => {
+    const refreshToken = get().refreshToken;
+
+    try {
+      if (refreshToken) await authApi.logout(refreshToken);
+    } catch {
+      // Ignore — token may already be expired or server unreachable
+    }
+
+    session.clear();
+    set({ accessToken: null, refreshToken: null, user: null });
+  }
+}));
