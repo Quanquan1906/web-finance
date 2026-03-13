@@ -1,67 +1,73 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/shared/ui/form';
-import { useAuthStore } from '../model/store';
+import { useState } from "react";
+import { useNavigate, useSearch, Link } from "@tanstack/react-router";
+import { useAuthStore } from "@/features/auth/model/store";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-});
+export function LoginForm() {
+  const login = useAuthStore((s) => s.login);
+  const nav = useNavigate();
+  const search = useSearch({ strict: false }) as { redirect?: string };
 
-export const LoginForm: React.FC = () => {
-  const { login, isLoading } = useAuthStore();
-  const form = useForm({
-    resolver: zodResolver(schema),
-    defaultValues: { email: '', password: '' },
-  });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
 
-  const onSubmit = async (values: z.infer<typeof schema>) => {
-    await login(values);
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErr(null);
+    setLoading(true);
+    try {
+      await login({ email, password });
+      nav({ to: search?.redirect || "/dashboard" });
+    } catch (e: any) {
+      setErr(e?.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="you@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-2">
+        <Label className="text-sm">Username hoặc Email</Label>
+        <Input
+          placeholder="you@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="email"
         />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm">Mật khẩu</Label>
+
+          {/* Bạn chưa có trang này thì để '#' hoặc tạo route sau */}
+          <Link
+            to="/login"
+            className="text-sm text-muted-foreground hover:underline"
+          >
+            Quên mật khẩu
+          </Link>
+        </div>
+
+        <Input
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          autoComplete="current-password"
         />
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? 'Logging in...' : 'Login'}
-        </Button>
-      </form>
-    </Form>
+      </div>
+
+      {err ? <p className="text-sm text-red-500">{err}</p> : null}
+
+      <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+      </Button>
+    </form>
   );
-};
+}

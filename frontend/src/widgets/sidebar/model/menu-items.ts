@@ -20,28 +20,28 @@ const financeManageItems = [
   },
   {
     title: 'Giao Dịch',
-    url: '/dashboard/transactions',
+    url: '/transactions',
     icon: Receipt,
     roles: [],
     children: []
   },
   {
     title: 'Danh Mục',
-    url: '/dashboard/categories',
+    url: '/categories',
     icon: Tags,
     children: [],
     roles: []
   },
   {
     title: 'Thống Kê',
-    url: '/dashboard/analytics',
+    url: '/analytics',
     icon: PieChart,
     children: [],
     roles: []
   },
   {
     title: 'AI / Trợ Lý',
-    url: '/dashboard/assistant',
+    url: '/assistant',
     icon: Bot,
     roles: [],
     children: []

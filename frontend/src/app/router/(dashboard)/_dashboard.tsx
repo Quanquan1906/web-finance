@@ -1,13 +1,12 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+// Dashboard layout — PUBLIC. No auth gate here.
+// Authentication is enforced per-action via requireAuth() in each widget/feature.
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { AppShell } from "@/widgets/app-shell";
 
-export const Route = createFileRoute('/(dashboard)/_dashboard')({
+export const Route = createFileRoute("/(dashboard)/_dashboard")({
   component: () => (
-    <div className="flex h-screen w-full">
-      <main className="flex flex-1 flex-col">
-        <div className="flex-1 overflow-auto p-4">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  )
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  ),
 });

@@ -13,8 +13,8 @@ import { Route as IndexRouteImport } from './app/router/index'
 import { Route as dashboardDashboardRouteImport } from './app/router/(dashboard)/_dashboard'
 import { Route as authAuthRouteImport } from './app/router/(auth)/_auth'
 import { Route as authAuthLoginRouteImport } from './app/router/(auth)/_auth.login'
-import { Route as dashboardDashboardUserIndexRouteImport } from './app/router/(dashboard)/_dashboard.user/index'
-import { Route as dashboardDashboardUserUserIdRouteImport } from './app/router/(dashboard)/_dashboard.user/$userId'
+import { Route as dashboardDashboardTransactionsIndexRouteImport } from './app/router/(dashboard)/_dashboard.transactions/index'
+import { Route as dashboardDashboardDashboardIndexRouteImport } from './app/router/(dashboard)/_dashboard.dashboard/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,30 +34,30 @@ const authAuthLoginRoute = authAuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => authAuthRoute,
 } as any)
-const dashboardDashboardUserIndexRoute =
-  dashboardDashboardUserIndexRouteImport.update({
-    id: '/user/',
-    path: '/user/',
+const dashboardDashboardTransactionsIndexRoute =
+  dashboardDashboardTransactionsIndexRouteImport.update({
+    id: '/transactions/',
+    path: '/transactions/',
     getParentRoute: () => dashboardDashboardRoute,
   } as any)
-const dashboardDashboardUserUserIdRoute =
-  dashboardDashboardUserUserIdRouteImport.update({
-    id: '/user/$userId',
-    path: '/user/$userId',
+const dashboardDashboardDashboardIndexRoute =
+  dashboardDashboardDashboardIndexRouteImport.update({
+    id: '/dashboard/',
+    path: '/dashboard/',
     getParentRoute: () => dashboardDashboardRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
-  '/user/$userId': typeof dashboardDashboardUserUserIdRoute
-  '/user': typeof dashboardDashboardUserIndexRoute
+  '/dashboard': typeof dashboardDashboardDashboardIndexRoute
+  '/transactions': typeof dashboardDashboardTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
-  '/user/$userId': typeof dashboardDashboardUserUserIdRoute
-  '/user': typeof dashboardDashboardUserIndexRoute
+  '/dashboard': typeof dashboardDashboardDashboardIndexRoute
+  '/transactions': typeof dashboardDashboardTransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -65,22 +65,22 @@ export interface FileRoutesById {
   '/(auth)/_auth': typeof authAuthRouteWithChildren
   '/(dashboard)/_dashboard': typeof dashboardDashboardRouteWithChildren
   '/(auth)/_auth/login': typeof authAuthLoginRoute
-  '/(dashboard)/_dashboard/user/$userId': typeof dashboardDashboardUserUserIdRoute
-  '/(dashboard)/_dashboard/user/': typeof dashboardDashboardUserIndexRoute
+  '/(dashboard)/_dashboard/dashboard/': typeof dashboardDashboardDashboardIndexRoute
+  '/(dashboard)/_dashboard/transactions/': typeof dashboardDashboardTransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/user/$userId' | '/user'
+  fullPaths: '/' | '/login' | '/dashboard' | '/transactions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/user/$userId' | '/user'
+  to: '/' | '/login' | '/dashboard' | '/transactions'
   id:
     | '__root__'
     | '/'
     | '/(auth)/_auth'
     | '/(dashboard)/_dashboard'
     | '/(auth)/_auth/login'
-    | '/(dashboard)/_dashboard/user/$userId'
-    | '/(dashboard)/_dashboard/user/'
+    | '/(dashboard)/_dashboard/dashboard/'
+    | '/(dashboard)/_dashboard/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,18 +119,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authAuthLoginRouteImport
       parentRoute: typeof authAuthRoute
     }
-    '/(dashboard)/_dashboard/user/': {
-      id: '/(dashboard)/_dashboard/user/'
-      path: '/user'
-      fullPath: '/user'
-      preLoaderRoute: typeof dashboardDashboardUserIndexRouteImport
+    '/(dashboard)/_dashboard/transactions/': {
+      id: '/(dashboard)/_dashboard/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof dashboardDashboardTransactionsIndexRouteImport
       parentRoute: typeof dashboardDashboardRoute
     }
-    '/(dashboard)/_dashboard/user/$userId': {
-      id: '/(dashboard)/_dashboard/user/$userId'
-      path: '/user/$userId'
-      fullPath: '/user/$userId'
-      preLoaderRoute: typeof dashboardDashboardUserUserIdRouteImport
+    '/(dashboard)/_dashboard/dashboard/': {
+      id: '/(dashboard)/_dashboard/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof dashboardDashboardDashboardIndexRouteImport
       parentRoute: typeof dashboardDashboardRoute
     }
   }
@@ -149,13 +149,14 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 )
 
 interface dashboardDashboardRouteChildren {
-  dashboardDashboardUserUserIdRoute: typeof dashboardDashboardUserUserIdRoute
-  dashboardDashboardUserIndexRoute: typeof dashboardDashboardUserIndexRoute
+  dashboardDashboardDashboardIndexRoute: typeof dashboardDashboardDashboardIndexRoute
+  dashboardDashboardTransactionsIndexRoute: typeof dashboardDashboardTransactionsIndexRoute
 }
 
 const dashboardDashboardRouteChildren: dashboardDashboardRouteChildren = {
-  dashboardDashboardUserUserIdRoute: dashboardDashboardUserUserIdRoute,
-  dashboardDashboardUserIndexRoute: dashboardDashboardUserIndexRoute,
+  dashboardDashboardDashboardIndexRoute: dashboardDashboardDashboardIndexRoute,
+  dashboardDashboardTransactionsIndexRoute:
+    dashboardDashboardTransactionsIndexRoute,
 }
 
 const dashboardDashboardRouteWithChildren =

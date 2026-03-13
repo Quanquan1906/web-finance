@@ -1,4 +1,5 @@
 import { LogOut } from 'lucide-react';
+import { useNavigate } from '@tanstack/react-router';
 import { Avatar, AvatarFallback } from '@/shared/ui/avatar';
 import { Button } from '@/shared/ui/button';
 import {
@@ -7,9 +8,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/shared/ui/dropdown-menu';
+import { useAuthStore } from '@/features/auth/model/store'; // đúng path của bạn
 
 export function SidebarAccount() {
-  const name = 'John Smith';
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+
+  const name = user?.name ?? user?.email ?? 'Guest';
   const initials = name
     .split(' ')
     .filter(Boolean)
@@ -17,9 +23,9 @@ export function SidebarAccount() {
     .map((w) => w[0]?.toUpperCase())
     .join('');
 
-  const onLogout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  const onLogout = async () => {
+    await logout();
+    navigate({ to: '/login', replace: true });
   };
 
   return (
