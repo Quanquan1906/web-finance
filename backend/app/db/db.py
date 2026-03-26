@@ -1,52 +1,60 @@
-import os
+import logging
+
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
-import logging
 
 from app.conf.config import Config
 
 load_dotenv()
 
-db_client: AsyncIOMotorClient = None
+db_client: AsyncIOMotorClient | None = None # type: ignore
 
 
-async def get_db() -> AsyncIOMotorClient:
-    db_name = Config.app_settings.get('db_name')
+async def get_db() -> AsyncIOMotorDatabase: # type: ignore
+    if db_client is None:
+        raise RuntimeError("Mongo client is not initialized")
+
+    db_name = Config.app_settings.get("db_name")
+    if not db_name:
+        raise RuntimeError("Database name is missing in config")
+
     return db_client[db_name]
 
 
-async def connect_and_init_db():
+async def connect_and_init_db() -> None:
     global db_client
+
     try:
         if Config.mongo_uri:
-            # Full URI (e.g. Atlas mongodb+srv://...) — credentials are embedded
             db_client = AsyncIOMotorClient(
                 Config.mongo_uri,
-                maxPoolSize=Config.app_settings.get('max_db_conn_count'),
-                minPoolSize=Config.app_settings.get('min_db_conn_count'),
+                maxPoolSize=Config.app_settings.get("max_db_conn_count"),
+                minPoolSize=Config.app_settings.get("min_db_conn_count"),
                 uuidRepresentation="standard",
             )
         else:
-            # Individual host + credentials
             db_client = AsyncIOMotorClient(
-                Config.app_settings.get('mongodb_url'),
-                username=Config.app_settings.get('db_username'),
-                password=Config.app_settings.get('db_password'),
-                maxPoolSize=Config.app_settings.get('max_db_conn_count'),
-                minPoolSize=Config.app_settings.get('min_db_conn_count'),
+                Config.app_settings.get("mongodb_url"),
+                username=Config.app_settings.get("db_username"),
+                password=Config.app_settings.get("db_password"),
+                maxPoolSize=Config.app_settings.get("max_db_conn_count"),
+                minPoolSize=Config.app_settings.get("min_db_conn_count"),
                 uuidRepresentation="standard",
             )
-        logging.info('Connected to mongo.')
+
+        logging.info("Connected to MongoDB.")
     except Exception as e:
-        logging.exception(f'Could not connect to mongo: {e}')
+        logging.exception(f"Could not connect to MongoDB: {e}")
         raise
 
 
-async def close_db_connect():
+async def close_db_connect() -> None:
     global db_client
+
     if db_client is None:
-        logging.warning('Connection is None, nothing to close.')
+        logging.warning("Mongo client is None, nothing to close.")
         return
+
     db_client.close()
     db_client = None
-    logging.info('Mongo connection closed.')
+    logging.info("Mongo connection closed.")
