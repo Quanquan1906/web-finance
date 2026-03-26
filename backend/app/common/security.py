@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from uuid import UUID, uuid4
 
 from jose import jwt, JWTError
@@ -7,6 +7,8 @@ from passlib.context import CryptContext
 
 from app.conf.config import Config
 from app.common.error import UnauthorizedError
+
+logger = logging.getLogger(__name__)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,13 +25,15 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 
 def create_access_token(user_id: UUID, roles: list[str]) -> str:
-    expire = datetime.utcnow() + timedelta(
+    now = datetime.now(UTC)
+    expire = now + timedelta(
         minutes=int(Config.jwt_settings["access_token_expires_min"])
     )
     payload = {
         "sub": str(user_id),
         "type": TOKEN_TYPE_ACCESS,
         "roles": roles,
+        "iat": now,
         "exp": expire,
     }
     return jwt.encode(
@@ -40,15 +44,16 @@ def create_access_token(user_id: UUID, roles: list[str]) -> str:
 
 
 def create_refresh_token(user_id: UUID) -> tuple[str, str, datetime]:
-    """Returns (encoded_token, jti, expires_at)."""
     jti = str(uuid4())
-    expire = datetime.utcnow() + timedelta(
+    now = datetime.now(UTC)
+    expire = now + timedelta(
         days=int(Config.jwt_settings["refresh_token_expires_days"])
     )
     payload = {
         "sub": str(user_id),
         "type": TOKEN_TYPE_REFRESH,
         "jti": jti,
+        "iat": now,
         "exp": expire,
     }
     token = jwt.encode(
@@ -61,12 +66,11 @@ def create_refresh_token(user_id: UUID) -> tuple[str, str, datetime]:
 
 def decode_token(token: str) -> dict:
     try:
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             Config.jwt_settings["jwt_secret"],
             algorithms=[Config.jwt_settings["jwt_alg"]],
         )
-        return payload
     except JWTError as e:
-        logging.warning(f"JWT decode error: {e}")
+        logger.warning("JWT decode error: %s", e)
         raise UnauthorizedError([{"message": "Invalid or expired token"}])

@@ -1,19 +1,16 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
-
+from pydantic import Field, EmailStr
 from .mongo_model import MongoModel
-
-
 class UserDB(MongoModel):
     id: UUID
-    email: str
+    email: EmailStr
     password_hash: str
     name: Optional[str] = None
-    roles: List[str] = ["USER"]
-    is_active: bool = True
-    created_at: datetime
-
+    roles: list[str] = Field(default_factory=lambda: ["USER"])
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class RefreshTokenDB(MongoModel):
     id: UUID
@@ -21,4 +18,5 @@ class RefreshTokenDB(MongoModel):
     jti: str
     expires_at: datetime
     revoked: bool = False
-    created_at: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    revoked_at: Optional[datetime] = None

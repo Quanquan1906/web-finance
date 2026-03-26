@@ -1,61 +1,76 @@
-/**
- * Pure localStorage I/O — zero React, zero Zustand, zero feature imports.
- * Shared layer: may be imported by any upper layer (features, widgets, app).
- * Upper layers must NOT be imported here (FSD unidirectional rule).
- */
-
 export interface SessionUser {
   id: string;
   email: string;
   name?: string | null;
   roles: string[];
+  is_active: boolean;
+  created_at?: string | null;
 }
 
-const KEY_ACCESS = 'accessToken';
-const KEY_REFRESH = 'refreshToken';
-const KEY_USER = 'authUser';
+const KEY_ACCESS = "auth.access_token";
+const KEY_REFRESH = "auth.refresh_token";
+const KEY_USER = "auth.user";
+
+const storage = {
+  getItem(key: string): string | null {
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(key);
+  },
+
+  setItem(key: string, value: string): void {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(key, value);
+  },
+
+  removeItem(key: string): void {
+    if (typeof window === "undefined") return;
+    window.localStorage.removeItem(key);
+  },
+};
 
 export const session = {
-  // ── access token ──────────────────────────────────────────────────────────
-  getAccessToken: (): string | null => localStorage.getItem(KEY_ACCESS),
+  getAccessToken: (): string | null => storage.getItem(KEY_ACCESS),
 
   setAccessToken: (token: string | null): void => {
     if (!token) {
-      localStorage.removeItem(KEY_ACCESS);
+      storage.removeItem(KEY_ACCESS);
       return;
     }
-    localStorage.setItem(KEY_ACCESS, token);
+    storage.setItem(KEY_ACCESS, token);
   },
 
-  // ── refresh token ─────────────────────────────────────────────────────────
-  getRefreshToken: (): string | null => localStorage.getItem(KEY_REFRESH),
+  getRefreshToken: (): string | null => storage.getItem(KEY_REFRESH),
 
   setRefreshToken: (token: string | null): void => {
     if (!token) {
-      localStorage.removeItem(KEY_REFRESH);
+      storage.removeItem(KEY_REFRESH);
       return;
     }
-    localStorage.setItem(KEY_REFRESH, token);
+    storage.setItem(KEY_REFRESH, token);
   },
 
-  // ── user ──────────────────────────────────────────────────────────────────
   getUser: (): SessionUser | null => {
     try {
-      const raw = localStorage.getItem(KEY_USER);
+      const raw = storage.getItem(KEY_USER);
       return raw ? (JSON.parse(raw) as SessionUser) : null;
     } catch {
       return null;
     }
   },
 
-  setUser: (user: SessionUser): void => localStorage.setItem(KEY_USER, JSON.stringify(user)),
+  setUser: (user: SessionUser | null): void => {
+    if (!user) {
+      storage.removeItem(KEY_USER);
+      return;
+    }
+    storage.setItem(KEY_USER, JSON.stringify(user));
+  },
 
-  // ── helpers ───────────────────────────────────────────────────────────────
-  isLoggedIn: (): boolean => Boolean(localStorage.getItem(KEY_ACCESS)),
+  isLoggedIn: (): boolean => Boolean(storage.getItem(KEY_ACCESS)),
 
   clear: (): void => {
-    localStorage.removeItem(KEY_ACCESS);
-    localStorage.removeItem(KEY_REFRESH);
-    localStorage.removeItem(KEY_USER);
-  }
+    storage.removeItem(KEY_ACCESS);
+    storage.removeItem(KEY_REFRESH);
+    storage.removeItem(KEY_USER);
+  },
 } as const;
