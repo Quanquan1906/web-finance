@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './app/router/__root'
 import { Route as IndexRouteImport } from './app/router/index'
 import { Route as dashboardDashboardRouteImport } from './app/router/(dashboard)/_dashboard'
 import { Route as authAuthRouteImport } from './app/router/(auth)/_auth'
+import { Route as dashboardDashboardCategoriesRouteImport } from './app/router/(dashboard)/_dashboard.categories'
 import { Route as authAuthRegisterRouteImport } from './app/router/(auth)/_auth.register'
 import { Route as authAuthLoginRouteImport } from './app/router/(auth)/_auth.login'
 import { Route as dashboardDashboardTransactionsIndexRouteImport } from './app/router/(dashboard)/_dashboard.transactions/index'
@@ -30,6 +31,12 @@ const authAuthRoute = authAuthRouteImport.update({
   id: '/(auth)/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const dashboardDashboardCategoriesRoute =
+  dashboardDashboardCategoriesRouteImport.update({
+    id: '/categories',
+    path: '/categories',
+    getParentRoute: () => dashboardDashboardRoute,
+  } as any)
 const authAuthRegisterRoute = authAuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -57,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
+  '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardIndexRoute
   '/transactions': typeof dashboardDashboardTransactionsIndexRoute
 }
@@ -64,6 +72,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
+  '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardIndexRoute
   '/transactions': typeof dashboardDashboardTransactionsIndexRoute
 }
@@ -74,14 +83,27 @@ export interface FileRoutesById {
   '/(dashboard)/_dashboard': typeof dashboardDashboardRouteWithChildren
   '/(auth)/_auth/login': typeof authAuthLoginRoute
   '/(auth)/_auth/register': typeof authAuthRegisterRoute
+  '/(dashboard)/_dashboard/categories': typeof dashboardDashboardCategoriesRoute
   '/(dashboard)/_dashboard/dashboard/': typeof dashboardDashboardDashboardIndexRoute
   '/(dashboard)/_dashboard/transactions/': typeof dashboardDashboardTransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/dashboard' | '/transactions'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/categories'
+    | '/dashboard'
+    | '/transactions'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/register' | '/dashboard' | '/transactions'
+  to:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/categories'
+    | '/dashboard'
+    | '/transactions'
   id:
     | '__root__'
     | '/'
@@ -89,6 +111,7 @@ export interface FileRouteTypes {
     | '/(dashboard)/_dashboard'
     | '/(auth)/_auth/login'
     | '/(auth)/_auth/register'
+    | '/(dashboard)/_dashboard/categories'
     | '/(dashboard)/_dashboard/dashboard/'
     | '/(dashboard)/_dashboard/transactions/'
   fileRoutesById: FileRoutesById
@@ -121,6 +144,13 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof authAuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/(dashboard)/_dashboard/categories': {
+      id: '/(dashboard)/_dashboard/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof dashboardDashboardCategoriesRouteImport
+      parentRoute: typeof dashboardDashboardRoute
     }
     '/(auth)/_auth/register': {
       id: '/(auth)/_auth/register'
@@ -168,11 +198,13 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 )
 
 interface dashboardDashboardRouteChildren {
+  dashboardDashboardCategoriesRoute: typeof dashboardDashboardCategoriesRoute
   dashboardDashboardDashboardIndexRoute: typeof dashboardDashboardDashboardIndexRoute
   dashboardDashboardTransactionsIndexRoute: typeof dashboardDashboardTransactionsIndexRoute
 }
 
 const dashboardDashboardRouteChildren: dashboardDashboardRouteChildren = {
+  dashboardDashboardCategoriesRoute: dashboardDashboardCategoriesRoute,
   dashboardDashboardDashboardIndexRoute: dashboardDashboardDashboardIndexRoute,
   dashboardDashboardTransactionsIndexRoute:
     dashboardDashboardTransactionsIndexRoute,
