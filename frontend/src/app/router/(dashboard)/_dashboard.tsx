@@ -1,12 +1,28 @@
-// Dashboard layout — PUBLIC. No auth gate here.
-// Authentication is enforced per-action via requireAuth() in each widget/feature.
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { AppShell } from "@/widgets/app-shell";
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { AppShell } from '@/widgets/app-shell';
+import { useAuthStore } from '@/features/auth';
 
-export const Route = createFileRoute("/(dashboard)/_dashboard")({
-  component: () => (
+export const Route = createFileRoute('/(dashboard)/_dashboard')({
+  beforeLoad: ({ location }) => {
+    const { accessToken } = useAuthStore.getState();
+    const persistedToken = localStorage.getItem('accessToken');
+
+    if (!accessToken && !persistedToken) {
+      throw redirect({
+        to: '/login',
+        search: {
+          redirect: location.href
+        }
+      });
+    }
+  },
+  component: DashboardLayout
+});
+
+function DashboardLayout() {
+  return (
     <AppShell>
       <Outlet />
     </AppShell>
-  ),
-});
+  );
+}
