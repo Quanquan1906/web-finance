@@ -24,11 +24,12 @@ export function AuthEventListener() {
     return () => window.removeEventListener("auth:unauthorized", handler);
   }, [logout, nav]);
 
-  // Also sync in-memory store when the interceptor silently refreshes the token
+  // Sync in-memory store when the interceptor silently refreshes the token.
+  // The interceptor already persisted both tokens to localStorage before
+  // dispatching this event, so syncFromSession() is sufficient.
   useEffect(() => {
-    const handler = (e: Event) => {
-      const newToken = (e as CustomEvent<string>).detail;
-      useAuthStore.getState().setAccessToken(newToken);
+    const handler = () => {
+      useAuthStore.getState().syncFromSession();
     };
 
     window.addEventListener("auth:token-refreshed", handler);

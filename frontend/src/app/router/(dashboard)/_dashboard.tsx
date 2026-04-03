@@ -1,22 +1,28 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { AppShell } from '@/widgets/app-shell';
-import { useAuthStore } from '@/features/auth';
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { AppShell } from "@/widgets/app-shell";
+import { useAuthStore } from "@/features/auth";
+import { session } from "@/shared/auth/session";
 
-export const Route = createFileRoute('/(dashboard)/_dashboard')({
+export const Route = createFileRoute("/(dashboard)/_dashboard")({
   beforeLoad: ({ location }) => {
-    const { accessToken } = useAuthStore.getState();
-    const persistedToken = localStorage.getItem('accessToken');
+    const store = useAuthStore.getState();
 
-    if (!accessToken && !persistedToken) {
+    if (!store.hydrated) {
+      store.hydrate();
+    }
+
+    const accessToken = store.accessToken ?? session.getAccessToken();
+
+    if (!accessToken) {
       throw redirect({
-        to: '/login',
+        to: "/login",
         search: {
-          redirect: location.href
-        }
+          redirect: location.href,
+        },
       });
     }
   },
-  component: DashboardLayout
+  component: DashboardLayout,
 });
 
 function DashboardLayout() {

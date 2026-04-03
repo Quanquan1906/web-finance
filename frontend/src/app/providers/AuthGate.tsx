@@ -5,10 +5,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   const nav = useNavigate();
   const loc = useLocation();
 
-  const { hydrated, accessToken, logout } = useAuthStore((s) => ({
+  const { hydrated, accessToken } = useAuthStore((s) => ({
     hydrated: s.hydrated,
     accessToken: s.accessToken,
-    logout: s.logout
   }));
 
   useEffect(() => {
@@ -22,20 +21,9 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
   }, [hydrated, accessToken, nav, loc.href]);
 
-  // 401 (server báo token hết hạn)
-  useEffect(() => {
-    const handler = async () => {
-      await logout(); // clear access/refresh/user trong store + localStorage
-      nav({
-        to: '/login',
-        search: { redirect: window.location.href } as any,
-        replace: true
-      });
-    };
-
-    window.addEventListener('auth:unauthorized', handler);
-    return () => window.removeEventListener('auth:unauthorized', handler);
-  }, [logout, nav]);
+  // auth:unauthorized is handled globally by AuthEventListener (mounted at
+  // the router root). AuthGate only needs to react to the store becoming empty,
+  // which happens as a side-effect of logout() clearing the store.
 
   if (!hydrated) return null; // tránh flicker
   if (!accessToken) return null; // đang redirect

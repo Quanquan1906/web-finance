@@ -17,6 +17,7 @@ from app.services.category_service import (
     get_categories,
     update_category,
 )
+from app.dependencies.auth import get_current_user
 
 router = APIRouter(prefix="/categories", tags=["categories"])
 security = HTTPBearer()
@@ -24,11 +25,10 @@ security = HTTPBearer()
 
 @router.get("", response_model=CategoryListResponse)
 async def list_categories(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: AsyncIOMotorDatabase = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
 ):
-    current_user = await get_me(db, credentials.credentials)
-    items = await get_categories(db, current_user.id)
+    items = await get_categories(db, str(current_user["_id"]))
     return CategoryListResponse(items=items)
 
 

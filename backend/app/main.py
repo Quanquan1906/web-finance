@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api import health
 from app.api.v1 import auth as auth_v1
 from app.api.v1 import categories as categories_v1
+from app.api.v1 import transactions as transactions_v1
 from app.api.v1 import sample_resource as sample_resource_v1
 from app.common.error import (
     BadRequest,
@@ -127,5 +128,10 @@ app.include_router(
 
 app.include_router(
     categories_v1.router,
+    prefix="/api/v1",
+)
+
+app.include_router(
+    transactions_v1.router,
     prefix="/api/v1",
 )
