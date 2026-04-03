@@ -1,12 +1,13 @@
 /// <reference types="vite/client" />
 
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import './app/styles/index.css';
 import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
 import { QueryClient } from '@tanstack/react-query';
 import { Provider } from './app/providers/root-provider';
+import { useAuthStore } from './features/auth';
 
 export const router = createRouter({
   routeTree,
@@ -27,6 +28,22 @@ function Router() {
   return <RouterProvider router={router} context={{}} />;
 }
 
+function AuthSyncListener() {
+  useEffect(() => {
+    const handleTokenRefreshed = () => {
+      useAuthStore.getState().syncFromSession();
+    };
+
+    window.addEventListener('auth:token-refreshed', handleTokenRefreshed);
+
+    return () => {
+      window.removeEventListener('auth:token-refreshed', handleTokenRefreshed);
+    };
+  }, []);
+
+  return null;
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -42,6 +59,7 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <Provider queryClient={queryClient}>
+        <AuthSyncListener />
         <Router />
       </Provider>
     </StrictMode>

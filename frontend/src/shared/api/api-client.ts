@@ -58,15 +58,14 @@ apiClient.interceptors.response.use(
 
     try {
       if (!refreshPromise) {
+        console.log('[refresh] start with token:', refreshToken);
+
         refreshPromise = refreshClient
-          .post<{
-            access_token: string;
-            refresh_token: string;
-            token_type: string;
-          }>('/api/v1/auth/refresh', {
+          .post('/api/v1/auth/refresh', {
             refresh_token: refreshToken
           })
           .then((r) => {
+            console.log('[refresh] success', r.data);
             const newAccessToken = r.data.access_token;
             const newRefreshToken = r.data.refresh_token;
 
@@ -84,6 +83,10 @@ apiClient.interceptors.response.use(
 
             return newAccessToken;
           })
+          .catch((err) => {
+            console.error('[refresh] failed', err?.response?.data || err);
+            throw err;
+          })
           .finally(() => {
             refreshPromise = null;
           });
@@ -94,6 +97,7 @@ apiClient.interceptors.response.use(
       original.headers.Authorization = `Bearer ${newAccessToken}`;
       return apiClient(original);
     } catch (e) {
+      console.error('[refresh] final catch', e);
       session.clear();
       window.dispatchEvent(new Event('auth:unauthorized'));
       return Promise.reject(e);

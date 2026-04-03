@@ -7,6 +7,8 @@ from passlib.context import CryptContext
 
 from app.conf.config import Config
 from app.common.error import UnauthorizedError
+from fastapi import HTTPException, status
+from jose import JWTError, ExpiredSignatureError
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,9 @@ def create_refresh_token(user_id: UUID) -> tuple[str, str, datetime]:
     return token, jti, expire
 
 
+from fastapi import HTTPException, status
+from jose import JWTError, ExpiredSignatureError
+
 def decode_token(token: str) -> dict:
     try:
         return jwt.decode(
@@ -71,6 +76,15 @@ def decode_token(token: str) -> dict:
             Config.jwt_settings["jwt_secret"],
             algorithms=[Config.jwt_settings["jwt_alg"]],
         )
+    except ExpiredSignatureError:
+        logger.warning("JWT decode error: Signature has expired.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Access token expired",
+        )
     except JWTError as e:
-        logger.warning("JWT decode error: %s", e)
-        raise UnauthorizedError([{"message": "Invalid or expired token"}])
+        logger.warning(f"JWT decode error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        )
