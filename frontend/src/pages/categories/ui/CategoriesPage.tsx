@@ -7,7 +7,6 @@ import { CreateCategoryDialog } from '@/features/category/create-category';
 import { EditCategoryDialog } from '@/features/category/edit-category';
 import { DeleteCategoryDialog } from '@/features/category/delete-category';
 import { CategoriesGrid } from '@/widgets/categories-grid';
-import { Label } from '@/shared/ui/label';
 
 export function CategoriesPage() {
   const { data: categories = [], isLoading, isError } = useCategoriesQuery();
@@ -51,33 +50,46 @@ export function CategoriesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
-        <div>
-          <Label className="text-3xl font-bold text-slate-900">Danh mục chi tiêu</Label>
-          <p className="mt-1 text-sm text-slate-500">Phân loại các khoản thu chi của bạn</p>
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Danh mục</h1>
+          <p className="text-sm text-muted-foreground">Phân loại các khoản thu chi của bạn</p>
         </div>
 
-        <Button onClick={handleOpenCreate} className="h-11 rounded-xl px-5">
+        <Button
+          onClick={handleOpenCreate}
+          className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-[0.98]"
+        >
           <Plus className="mr-2 size-4" />
           Thêm danh mục
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="rounded-2xl border bg-white p-6 text-sm text-slate-500">
-          Đang tải danh mục...
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-20 animate-pulse rounded-2xl border bg-muted" />
+          ))}
         </div>
       ) : isError ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-600">
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-sm text-destructive">
           Không thể tải danh mục. Vui lòng thử lại.
         </div>
       ) : categories.length === 0 ? (
-        <div className="rounded-2xl border bg-white p-10 text-center">
-          <p className="text-base font-medium text-slate-900">Bạn chưa có danh mục nào</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Hãy tạo danh mục đầu tiên để bắt đầu quản lý giao dịch.
-          </p>
-          <Button onClick={handleOpenCreate} className="mt-4">
-            Thêm danh mục
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-border bg-card py-16 text-center shadow-sm">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+            <Plus className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-foreground">Chưa có danh mục nào</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Tạo danh mục đầu tiên để bắt đầu phân loại giao dịch
+            </p>
+          </div>
+          <Button
+            onClick={handleOpenCreate}
+            className="mt-2 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            Thêm danh mục đầu tiên
           </Button>
         </div>
       ) : (

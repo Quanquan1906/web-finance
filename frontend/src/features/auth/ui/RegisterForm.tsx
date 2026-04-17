@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 import { useAuthStore } from "@/features/auth/model/store";
 import { Button } from "@/shared/ui/button";
@@ -90,8 +90,8 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="name" className="text-sm">
+      <div className="space-y-1.5">
+        <Label htmlFor="name" className="text-sm font-medium">
           Họ và tên
         </Label>
         <Input
@@ -102,11 +102,12 @@ export function RegisterForm() {
           onChange={(e) => setName(e.target.value)}
           autoComplete="name"
           disabled={loading}
+          className="h-11 rounded-xl border-border px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm">
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-sm font-medium">
           Email
         </Label>
         <Input
@@ -117,11 +118,12 @@ export function RegisterForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           disabled={loading}
+          className="h-11 rounded-xl border-border px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm">
+      <div className="space-y-1.5">
+        <Label htmlFor="password" className="text-sm font-medium">
           Mật khẩu
         </Label>
         <Input
@@ -132,11 +134,12 @@ export function RegisterForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="new-password"
           disabled={loading}
+          className="h-11 rounded-xl border-border px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-sm">
+      <div className="space-y-1.5">
+        <Label htmlFor="confirmPassword" className="text-sm font-medium">
           Xác nhận mật khẩu
         </Label>
         <Input
@@ -147,21 +150,23 @@ export function RegisterForm() {
           onChange={(e) => setConfirmPassword(e.target.value)}
           autoComplete="new-password"
           disabled={loading}
+          className="h-11 rounded-xl border-border px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      {err ? <p className="text-sm text-red-500">{err}</p> : null}
+      {err ? (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {err}
+        </div>
+      ) : null}
 
-      <Button type="submit" className="w-full rounded-xl" disabled={loading}>
-        {loading ? "Đang tạo tài khoản..." : "Đăng ký"}
+      <Button
+        type="submit"
+        className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-[0.98]"
+        disabled={loading}
+      >
+        {loading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
       </Button>
-
-      <p className="text-center text-sm text-muted-foreground">
-        Đã có tài khoản?{" "}
-        <Link to="/login" className="font-medium hover:underline">
-          Đăng nhập
-        </Link>
-      </p>
     </form>
   );
 }

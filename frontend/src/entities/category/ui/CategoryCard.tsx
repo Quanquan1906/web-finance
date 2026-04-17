@@ -4,6 +4,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/shared/ui/dropdown-menu';
 import { cn } from '@/shared/lib/utils';
@@ -20,14 +21,14 @@ export function CategoryCard({ category, onEdit, onDelete, className }: Category
   return (
     <div
       className={cn(
-        'flex items-center justify-between rounded-2xl border bg-white px-4 py-4 shadow-sm transition-shadow hover:shadow-md',
+        'group flex items-center justify-between rounded-2xl border border-border bg-card px-4 py-4 shadow-sm transition-all hover:shadow-md',
         className
       )}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3.5">
         <div
           className={cn(
-            'grid size-12 place-items-center rounded-2xl text-xl text-white',
+            'grid h-11 w-11 shrink-0 place-items-center rounded-xl text-lg text-white shadow-sm',
             category.color
           )}
         >
@@ -35,8 +36,8 @@ export function CategoryCard({ category, onEdit, onDelete, className }: Category
         </div>
 
         <div>
-          <p className="text-base font-semibold text-slate-900">{category.name}</p>
-          <p className="text-sm text-slate-500">{category.transactionCount} giao dịch</p>
+          <p className="text-sm font-semibold text-foreground">{category.name}</p>
+          <p className="text-xs text-muted-foreground">{category.transactionCount} giao dịch</p>
         </div>
       </div>
 
@@ -45,23 +46,27 @@ export function CategoryCard({ category, onEdit, onDelete, className }: Category
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full text-slate-500 hover:text-slate-900"
+            className="h-8 w-8 rounded-lg text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
           >
             <MoreHorizontal className="size-4" />
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => onEdit(category.id)}>
-            <Pencil className="mr-2 size-4" />
+        <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuItem
+            onClick={() => onEdit(category.id)}
+            className="cursor-pointer"
+          >
+            <Pencil className="mr-2 size-3.5" />
             Chỉnh sửa
           </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             onClick={() => onDelete(category.id)}
-            className="text-red-600 focus:text-red-600"
+            className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
           >
-            <Trash2 className="mr-2 size-4" />
-            Xóa
+            <Trash2 className="mr-2 size-3.5" />
+            Xóa danh mục
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

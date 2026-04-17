@@ -15,8 +15,8 @@ export function TransactionAmount({
   return (
     <span
       className={cn(
-        "text-sm font-semibold",
-        isIncome ? "text-emerald-600" : "text-slate-900"
+        "text-sm font-semibold tabular-nums",
+        isIncome ? "text-emerald-600" : "text-destructive"
       )}
     >
       {isIncome ? "+" : "-"}

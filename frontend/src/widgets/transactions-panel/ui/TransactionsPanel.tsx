@@ -52,16 +52,20 @@ export function TransactionsPanel() {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="text-sm text-slate-500">Đang tải giao dịch...</div>
+      <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+        <div className="space-y-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-12 animate-pulse rounded-xl bg-muted" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="text-sm text-red-500">Không tải được danh sách giao dịch.</div>
+      <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5">
+        <div className="text-sm text-destructive">Không tải được danh sách giao dịch.</div>
       </div>
     );
   }
