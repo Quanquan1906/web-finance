@@ -81,9 +81,9 @@ export function LoginForm() {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm">
+    <form onSubmit={onSubmit} className="space-y-5">
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-sm font-medium">
           Email
         </Label>
         <Input
@@ -94,17 +94,18 @@ export function LoginForm() {
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
           disabled={loading}
+          className="h-11 rounded-xl border-border bg-background px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-sm">
+          <Label htmlFor="password" className="text-sm font-medium">
             Mật khẩu
           </Label>
 
-          <Link to="/login" className="text-muted-foreground text-sm hover:underline">
-            Quên mật khẩu
+          <Link to="/login" className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline">
+            Quên mật khẩu?
           </Link>
         </div>
 
@@ -116,12 +117,21 @@ export function LoginForm() {
           onChange={(e) => setPassword(e.target.value)}
           autoComplete="current-password"
           disabled={loading}
+          className="h-11 rounded-xl border-border bg-background px-4 text-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
         />
       </div>
 
-      {err ? <p className="text-sm text-red-500">{err}</p> : null}
+      {err ? (
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {err}
+        </div>
+      ) : null}
 
-      <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+      <Button
+        type="submit"
+        className="h-11 w-full rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary/90 active:scale-[0.98]"
+        disabled={loading}
+      >
         {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
       </Button>
     </form>

@@ -35,23 +35,23 @@ export function TransactionsTable({
   onDelete,
 }: TransactionsTableProps) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow className="bg-slate-50 hover:bg-slate-50">
-            <TableHead className="h-11 px-4 text-xs font-medium text-slate-500">
+          <TableRow className="border-border bg-muted/40 hover:bg-muted/40">
+            <TableHead className="h-10 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Ghi chú
             </TableHead>
-            <TableHead className="h-11 px-4 text-xs font-medium text-slate-500">
+            <TableHead className="h-10 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Danh mục
             </TableHead>
-            <TableHead className="h-11 px-4 text-xs font-medium text-slate-500">
+            <TableHead className="h-10 px-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Ngày
             </TableHead>
-            <TableHead className="h-11 px-4 text-right text-xs font-medium text-slate-500">
+            <TableHead className="h-10 px-4 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Số tiền
             </TableHead>
-            <TableHead className="h-11 px-4 text-right text-xs font-medium text-slate-500">
+            <TableHead className="h-10 px-4 text-right text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Thao tác
             </TableHead>
           </TableRow>
@@ -62,7 +62,7 @@ export function TransactionsTable({
             <TableRow>
               <TableCell
                 colSpan={5}
-                className="h-24 text-center text-sm text-slate-500"
+                className="h-32 text-center text-sm text-muted-foreground"
               >
                 Chưa có giao dịch nào
               </TableCell>
@@ -72,12 +72,15 @@ export function TransactionsTable({
               const category = categoryMap.get(transaction.category_id);
 
               return (
-                <TableRow key={transaction.id} className="hover:bg-slate-50/60">
-                  <TableCell className="px-4 py-4 text-sm font-medium text-slate-800">
+                <TableRow
+                  key={transaction.id}
+                  className="border-border transition-colors hover:bg-muted/30"
+                >
+                  <TableCell className="px-4 py-3.5 text-sm font-medium text-foreground">
                     {transaction.note || "-"}
                   </TableCell>
 
-                  <TableCell className="px-4 py-4">
+                  <TableCell className="px-4 py-3.5">
                     <TransactionCategoryBadge
                       name={category?.name}
                       icon={category?.icon}
@@ -85,37 +88,37 @@ export function TransactionsTable({
                     />
                   </TableCell>
 
-                  <TableCell className="px-4 py-4 text-sm text-slate-500">
+                  <TableCell className="px-4 py-3.5 text-sm text-muted-foreground">
                     {formatDate(transaction.date)}
                   </TableCell>
 
-                  <TableCell className="px-4 py-4 text-right">
+                  <TableCell className="px-4 py-3.5 text-right">
                     <TransactionAmount
                       amount={transaction.amount}
                       type={transaction.type}
                     />
                   </TableCell>
 
-                  <TableCell className="px-4 py-4">
+                  <TableCell className="px-4 py-3.5">
                     <div className="flex items-center justify-end gap-1">
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        className="size-8 rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                         onClick={() => onEdit?.(transaction)}
                       >
-                        <Pencil className="size-4" />
+                        <Pencil className="size-3.5" />
                       </Button>
 
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"
+                        className="size-8 rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => onDelete?.(transaction)}
                       >
-                        <Trash2 className="size-4" />
+                        <Trash2 className="size-3.5" />
                       </Button>
                     </div>
                   </TableCell>
