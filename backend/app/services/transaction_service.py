@@ -1,3 +1,4 @@
+from datetime import date
 from uuid import UUID
 
 from fastapi import HTTPException, status
@@ -6,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.transaction_repository import TransactionRepository
-from app.schemas.transaction import TransactionCreate, TransactionUpdate
+from app.schemas.transaction import TransactionCreate, TransactionResponse, TransactionUpdate
+from app.schemas.common import PaginatedResponse
 
 
 class TransactionService:
@@ -15,12 +17,31 @@ class TransactionService:
         self.transaction_repo = TransactionRepository(db)
         self.category_repo = CategoryRepository(db)
 
-    def list_my_transactions(self, current_user: User):
-        # Trả toàn bộ transaction của user hiện tại
-        return self.transaction_repo.list_by_user_id(current_user.id)
+    def list_my_transactions(
+        self,
+        current_user: User,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        tx_type: str | None = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> PaginatedResponse[TransactionResponse]:
+        items, total = self.transaction_repo.list_by_user_id(
+            user_id=current_user.id,
+            date_from=date_from,
+            date_to=date_to,
+            tx_type=tx_type,
+            limit=limit,
+            offset=offset,
+        )
+        return PaginatedResponse[TransactionResponse](
+            items=items,
+            total=total,
+            limit=limit,
+            offset=offset,
+        )
 
     def get_my_transaction(self, current_user: User, transaction_id: UUID):
-        # Chỉ lấy transaction của chính user hiện tại
         transaction = self.transaction_repo.get_by_id_for_user(
             transaction_id,
             current_user.id,
@@ -33,7 +54,6 @@ class TransactionService:
         return transaction
 
     def create_transaction(self, current_user: User, payload: TransactionCreate):
-        # Category phải thuộc về chính user hiện tại
         category = self.category_repo.get_by_id_for_user(
             payload.category_id,
             current_user.id,
@@ -66,7 +86,6 @@ class TransactionService:
         transaction_id: UUID,
         payload: TransactionUpdate,
     ):
-        # Chỉ cho sửa transaction của chính user hiện tại
         transaction = self.transaction_repo.get_by_id_for_user(
             transaction_id,
             current_user.id,
@@ -78,7 +97,6 @@ class TransactionService:
             )
 
         try:
-            # Chỉ update field nào user thật sự gửi lên
             if "category_id" in payload.model_fields_set:
                 if payload.category_id is None:
                     raise HTTPException(
@@ -134,7 +152,6 @@ class TransactionService:
             raise
 
     def delete_transaction(self, current_user: User, transaction_id: UUID) -> None:
-        # Chỉ cho xóa transaction của chính user hiện tại
         transaction = self.transaction_repo.get_by_id_for_user(
             transaction_id,
             current_user.id,
