@@ -1,3 +1,6 @@
+from datetime import date
+from typing import Literal
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -12,13 +15,15 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 @router.get("/overview", response_model=DashboardOverviewResponse)
 def get_dashboard_overview(
-    year: int = Query(..., ge=2000, le=2100),
-    month: int = Query(..., ge=1, le=12),
+    date_from: date | None = Query(default=None),
+    date_to: date | None = Query(default=None),
+    preset: Literal["current_month", "current_year", "last_15_days"] | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
     return DashboardService(db).get_overview(
         current_user=current_user,
-        year=year,
-        month=month,
+        date_from=date_from,
+        date_to=date_to,
+        preset=preset,
     )
