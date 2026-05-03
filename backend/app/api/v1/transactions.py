@@ -16,6 +16,7 @@ from app.schemas.transaction import (
 from app.services.transaction_service import TransactionService
 from app.dependencies.pagination import PaginationParams, get_pagination_params
 from app.schemas.common import PaginatedResponse
+from app.dependencies.sorting import TransactionSortingParams, get_transaction_sorting_params
 
 router = APIRouter(prefix="/transactions", tags=["transactions"])
 
@@ -26,6 +27,7 @@ def list_my_transactions(
     date_to: date | None = Query(default=None),
     tx_type: Literal["income", "expense"] | None = Query(default=None, alias="type"),
     pagination: PaginationParams = Depends(get_pagination_params),
+    sorting: TransactionSortingParams = Depends(get_transaction_sorting_params),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -36,6 +38,8 @@ def list_my_transactions(
         tx_type=tx_type,
         limit=pagination.limit,
         offset=pagination.offset,
+        sort_by=sorting.sort_by,
+        sort_order=sorting.sort_order,
     )
 
 
