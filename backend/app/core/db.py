@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.core.config import settings
 
-
+# Base class for all database models
 class Base(DeclarativeBase):
     pass
 

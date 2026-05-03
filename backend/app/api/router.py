@@ -5,6 +5,9 @@ from sqlalchemy import text
 
 from app.dependencies.db import get_db
 
+from app.api.v1.auth import router as auth_router
+from app.api.v1.users import router as users_router
+
 api_router = APIRouter()
 
 @api_router.get("/health")
@@ -15,3 +18,7 @@ async def health_check():
 def db_health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
     return {"status": "ok", "database": "connected"}
+
+api_router.include_router(auth_router)
+
+api_router.include_router(users_router)
