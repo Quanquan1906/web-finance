@@ -6,12 +6,15 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.repositories.category_repository import CategoryRepository
 from app.schemas.category import CategoryCreate, CategoryUpdate
-
+from app.repositories.budget_repository import BudgetRepository
+from app.repositories.transaction_repository import TransactionRepository
 
 class CategoryService:
     def __init__(self, db: Session):
         self.db = db
         self.category_repo = CategoryRepository(db)
+        self.budget_repo = BudgetRepository(db)
+        self.transaction_repo = TransactionRepository(db)
 
     def list_my_categories(self, current_user: User):
         return self.category_repo.list_by_user_id(current_user.id)
@@ -80,6 +83,21 @@ class CategoryService:
                 detail="Category not found",
             )
 
+        transaction_count = self.transaction_repo.count_by_category_for_user(
+            category_id=category.id,
+            user_id=current_user.id,
+        )
+        budget_count = self.budget_repo.count_by_category_for_user(
+            category_id=category.id,
+            user_id=current_user.id,
+        )
+
+        if transaction_count > 0 or budget_count > 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete category that is being used by transactions or budgets",
+            )
+        
         try:
             self.category_repo.delete(category)
             self.db.commit()
