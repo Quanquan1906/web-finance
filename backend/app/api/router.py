@@ -7,6 +7,7 @@ from app.dependencies.db import get_db
 
 from app.api.v1.auth import router as auth_router
 from app.api.v1.users import router as users_router
+from app.api.v1.categories import router as categories_router
 
 api_router = APIRouter()
 
@@ -22,3 +23,5 @@ def db_health(db: Session = Depends(get_db)):
 api_router.include_router(auth_router)
 
 api_router.include_router(users_router)
+
+api_router.include_router(categories_router)
