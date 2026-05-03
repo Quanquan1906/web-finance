@@ -48,7 +48,7 @@ class TransactionRepository:
             "amount": Transaction.amount,
             "created_at": Transaction.created_at,
         }[sort_by]
-         
+
         if sort_order == "asc":
             base_stmt = base_stmt.order_by(sort_column.asc())
         else:
@@ -89,6 +89,17 @@ class TransactionRepository:
         self.db.add(transaction)
         self.db.flush()
         return transaction
+
+    def count_by_category_for_user(self, category_id: UUID, user_id: UUID) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(Transaction)
+            .where(
+                Transaction.category_id == category_id,
+                Transaction.user_id == user_id,
+            )
+        )
+        return self.db.scalar(stmt) or 0
 
     def delete(self, transaction: Transaction) -> None:
         self.db.delete(transaction)

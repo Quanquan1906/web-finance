@@ -28,7 +28,9 @@ class BudgetRepository:
         if month is not None:
             stmt = stmt.where(Budget.month == month)
 
-        stmt = stmt.order_by(Budget.year.desc(), Budget.month.desc(), Budget.created_at.desc())
+        stmt = stmt.order_by(
+            Budget.year.desc(), Budget.month.desc(), Budget.created_at.desc()
+        )
         return list(self.db.scalars(stmt).all())
 
     def get_by_id_for_user(self, budget_id: UUID, user_id: UUID) -> Budget | None:
@@ -73,6 +75,17 @@ class BudgetRepository:
         self.db.add(budget)
         self.db.flush()
         return budget
+
+    def count_by_category_for_user(self, category_id: UUID, user_id: UUID) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(Budget)
+            .where(
+                Budget.category_id == category_id,
+                Budget.user_id == user_id,
+            )
+        )
+        return self.db.scalar(stmt) or 0
 
     def delete(self, budget: Budget) -> None:
         self.db.delete(budget)
