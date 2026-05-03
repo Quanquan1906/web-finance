@@ -20,6 +20,8 @@ class TransactionRepository:
         tx_type: str | None = None,
         limit: int = 20,
         offset: int = 0,
+        sort_by: str = "transaction_date",
+        sort_order: str = "desc",
     ) -> tuple[list[Transaction], int]:
         base_stmt = select(Transaction).where(Transaction.user_id == user_id)
         count_stmt = (
@@ -41,14 +43,18 @@ class TransactionRepository:
             count_stmt = count_stmt.where(Transaction.type == tx_type)
 
         total = self.db.scalar(count_stmt) or 0
-        stmt = (
-            base_stmt.order_by(
-                Transaction.transaction_date.desc(),
-                Transaction.created_at.desc(),
-            )
-            .limit(limit)
-            .offset(offset)
-        )
+        sort_column = {
+            "transaction_date": Transaction.transaction_date,
+            "amount": Transaction.amount,
+            "created_at": Transaction.created_at,
+        }[sort_by]
+         
+        if sort_order == "asc":
+            base_stmt = base_stmt.order_by(sort_column.asc())
+        else:
+            base_stmt = base_stmt.order_by(sort_column.desc())
+
+        stmt = base_stmt.limit(limit).offset(offset)
 
         items = list(self.db.scalars(stmt).all())
         return items, total

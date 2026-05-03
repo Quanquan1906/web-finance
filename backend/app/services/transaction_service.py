@@ -25,6 +25,8 @@ class TransactionService:
         tx_type: str | None = None,
         limit: int = 20,
         offset: int = 0,
+        sort_by: str = "transaction_date",
+        sort_order: str = "desc",
     ) -> PaginatedResponse[TransactionResponse]:
         items, total = self.transaction_repo.list_by_user_id(
             user_id=current_user.id,
@@ -33,6 +35,8 @@ class TransactionService:
             tx_type=tx_type,
             limit=limit,
             offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
         )
         return PaginatedResponse[TransactionResponse](
             items=items,
