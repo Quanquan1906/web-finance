@@ -44,9 +44,8 @@ export function TransactionForm({
       category_id: '',
       amount: '',
       type: 'expense',
-      date: getTodayValue(),
+      transaction_date: getTodayValue(),
       note: '',
-      source: 'manual'
     }
   });
 
@@ -55,9 +54,8 @@ export function TransactionForm({
       category_id: defaultValues?.category_id ?? '',
       amount: defaultValues?.amount !== undefined ? String(defaultValues.amount) : '',
       type: defaultValues?.type ?? 'expense',
-      date: defaultValues?.date ?? getTodayValue(),
+      transaction_date: defaultValues?.transaction_date ?? getTodayValue(),
       note: defaultValues?.note ?? '',
-      source: defaultValues?.source ?? 'manual'
     });
   }, [defaultValues, form]);
 
@@ -127,7 +125,6 @@ export function TransactionForm({
 
                     return (
                       <SelectItem key={categoryId} value={categoryId}>
-                        {category.icon ? `${category.icon} ` : ''}
                         {category.name}
                       </SelectItem>
                     );
@@ -141,7 +138,7 @@ export function TransactionForm({
 
         <FormField
           control={form.control}
-          name="date"
+          name="transaction_date"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Ngày</FormLabel>

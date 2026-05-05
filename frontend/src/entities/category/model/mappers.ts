@@ -7,8 +7,6 @@ export function toCategoryCardViewModel(
   return {
     id: category.id,
     name: category.name,
-    icon: category.icon,
-    color: category.color,
     transactionCount
   };
 }

@@ -8,22 +8,22 @@ import type {
 
 export const transactionApi = {
   getTransactions: async () => {
-    const { data } = await apiClient.get<TransactionListResponse>("api/v1/transactions");
+    const { data } = await apiClient.get<TransactionListResponse>("/transactions");
     return data;
   },
 
   createTransaction: async (payload: CreateTransactionInput) => {
-    const { data } = await apiClient.post<Transaction>("api/v1/transactions", payload);
+    const { data } = await apiClient.post<Transaction>("/transactions", payload);
     return data;
   },
 
   updateTransaction: async (id: string, payload: UpdateTransactionInput) => {
-    const { data } = await apiClient.patch<Transaction>(`api/v1/transactions/${id}`, payload);
+    const { data } = await apiClient.patch<Transaction>(`/transactions/${id}`, payload);
     return data;
   },
 
   deleteTransaction: async (id: string) => {
-    const { data } = await apiClient.delete<{ message: string }>(`api/v1/transactions/${id}`);
+    const { data } = await apiClient.delete<{ message: string }>(`/transactions/${id}`);
     return data;
   },
 };

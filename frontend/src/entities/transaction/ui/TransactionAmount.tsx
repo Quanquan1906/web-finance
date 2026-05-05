@@ -2,7 +2,7 @@ import { formatCurrency } from "@/shared/lib/formatCurrency";
 import { cn } from "@/shared/lib/utils";
 
 interface TransactionAmountProps {
-  amount: number;
+  amount: number | string;
   type: "income" | "expense";
 }
 
@@ -20,7 +20,7 @@ export function TransactionAmount({
       )}
     >
       {isIncome ? "+" : "-"}
-      {formatCurrency(amount)}
+      {formatCurrency(parseFloat(String(amount)))}
     </span>
   );
 }

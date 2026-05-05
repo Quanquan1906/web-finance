@@ -33,9 +33,8 @@ export function EditTransactionDialog({
       category_id: transaction.category_id,
       amount: String(transaction.amount),
       type: transaction.type,
-      date: transaction.date,
+      transaction_date: transaction.transaction_date,
       note: transaction.note ?? '',
-      source: transaction.source ?? 'manual',
     };
   }, [transaction]);
 

@@ -37,11 +37,11 @@ export function DashboardPage() {
   const stats = useMemo(() => {
     const totalIncome = transactions
       .filter((t) => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
 
     const totalExpense = transactions
       .filter((t) => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + parseFloat(String(t.amount)), 0);
 
     const balance = totalIncome - totalExpense;
 
@@ -128,7 +128,7 @@ export function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{t.note || "Giao dịch"}</p>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
+                    <p className="text-xs text-muted-foreground">{t.transaction_date}</p>
                   </div>
                 </div>
                 <span
@@ -138,7 +138,7 @@ export function DashboardPage() {
                   )}
                 >
                   {t.type === "income" ? "+" : "-"}
-                  {formatCurrency(t.amount)}
+                  {formatCurrency(parseFloat(String(t.amount)))}
                 </span>
               </div>
             ))}

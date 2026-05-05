@@ -75,7 +75,7 @@ export function RegisterForm() {
 
     try {
       await register({
-        name: name.trim() || undefined,
+        full_name: name.trim() || undefined,
         email: email.trim(),
         password,
       });

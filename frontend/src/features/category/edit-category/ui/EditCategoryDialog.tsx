@@ -47,8 +47,6 @@ export function EditCategoryDialog({
         <CategoryForm
           initialValues={{
             name: category?.name ?? DEFAULT_CATEGORY_FORM_VALUES.name,
-            icon: category?.icon ?? DEFAULT_CATEGORY_FORM_VALUES.icon,
-            color: category?.color ?? DEFAULT_CATEGORY_FORM_VALUES.color,
           }}
           submitLabel="Lưu thay đổi"
           isSubmitting={editCategoryMutation.isPending}

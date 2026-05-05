@@ -27,12 +27,9 @@ export function CategoryCard({ category, onEdit, onDelete, className }: Category
     >
       <div className="flex items-center gap-3.5">
         <div
-          className={cn(
-            'grid h-11 w-11 shrink-0 place-items-center rounded-xl text-lg text-white shadow-sm',
-            category.color
-          )}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-lg text-primary shadow-sm"
         >
-          <span>{category.icon}</span>
+          <span>{category.name.charAt(0).toUpperCase()}</span>
         </div>
 
         <div>
