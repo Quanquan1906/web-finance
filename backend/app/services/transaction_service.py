@@ -67,6 +67,11 @@ class TransactionService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Category not found",
             )
+        if category.kind != payload.type:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Selected category does not match transaction type",
+            )
 
         try:
             transaction = self.transaction_repo.create(
@@ -101,6 +106,22 @@ class TransactionService:
             )
 
         try:
+            # category hiện tại của transaction
+            current_category = self.category_repo.get_by_id_for_user(
+                transaction.category_id,
+                current_user.id,
+            )
+            if not current_category:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Current category not found",
+                )
+
+            # giả sử mặc định giữ nguyên giá trị cũ
+            target_category = current_category
+            target_type = transaction.type
+
+            # nếu user gửi category_id mới
             if "category_id" in payload.model_fields_set:
                 if payload.category_id is None:
                     raise HTTPException(
@@ -108,25 +129,40 @@ class TransactionService:
                         detail="category_id cannot be null",
                     )
 
-                category = self.category_repo.get_by_id_for_user(
+                new_category = self.category_repo.get_by_id_for_user(
                     payload.category_id,
                     current_user.id,
                 )
-                if not category:
+                if not new_category:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="Category not found",
                     )
 
-                transaction.category_id = payload.category_id
+                target_category = new_category
 
+            # nếu user gửi type mới
             if "type" in payload.model_fields_set:
                 if payload.type is None:
                     raise HTTPException(
                         status_code=status.HTTP_400_BAD_REQUEST,
                         detail="type cannot be null",
                     )
-                transaction.type = payload.type
+                target_type = payload.type
+
+            # check rule cuối cùng
+            if target_category.kind != target_type:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Selected category does not match transaction type",
+                )
+
+            # bắt đầu update thật
+            if "category_id" in payload.model_fields_set:
+                transaction.category_id = target_category.id
+
+            if "type" in payload.model_fields_set:
+                transaction.type = target_type
 
             if "amount" in payload.model_fields_set:
                 if payload.amount is None:
@@ -151,6 +187,7 @@ class TransactionService:
             self.db.commit()
             self.db.refresh(transaction)
             return transaction
+
         except Exception:
             self.db.rollback()
             raise

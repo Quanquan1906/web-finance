@@ -5,6 +5,7 @@ export { toCategoryCardViewModel } from './model/mappers';
 export { CategoryCard } from './ui/CategoryCard';
 export type {
   Category,
+  CategoryKind,
   CategoryListResponse,
   CreateCategoryInput,
   UpdateCategoryInput,

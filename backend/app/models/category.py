@@ -27,6 +27,9 @@ class Category(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(100), nullable=False)
+    
+    # income | expense
+    kind: Mapped[str] = mapped_column(String(20), nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

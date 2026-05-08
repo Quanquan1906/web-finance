@@ -29,9 +29,10 @@ export function EditCategoryDialog({
   const handleSubmit = async (values: CategoryFormValues) => {
     if (!category) return;
 
+    // CategoryUpdate only accepts name; kind is immutable
     await editCategoryMutation.mutateAsync({
       categoryId: category.id,
-      payload: values,
+      payload: { name: values.name },
     });
 
     onOpenChange(false);
@@ -47,7 +48,9 @@ export function EditCategoryDialog({
         <CategoryForm
           initialValues={{
             name: category?.name ?? DEFAULT_CATEGORY_FORM_VALUES.name,
+            kind: category?.kind ?? DEFAULT_CATEGORY_FORM_VALUES.kind,
           }}
+          hideKind
           submitLabel="Lưu thay đổi"
           isSubmitting={editCategoryMutation.isPending}
           onSubmit={handleSubmit}

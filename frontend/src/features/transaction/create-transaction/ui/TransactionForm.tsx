@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-import { useCategoriesQuery } from '@/entities/category';
+import { useCategoriesQuery, type CategoryKind } from '@/entities/category';
 import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
@@ -35,8 +35,9 @@ export function TransactionForm({
   submitText = 'Lưu giao dịch',
   onSubmit
 }: TransactionFormProps) {
+  // Fetch all categories — filtered client-side by kind to match selected type
   const { data: categoriesData } = useCategoriesQuery();
-  const categories = categoriesData ?? [];
+  const allCategories = categoriesData ?? [];
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionFormSchema),
@@ -48,6 +49,22 @@ export function TransactionForm({
       note: '',
     }
   });
+
+  // Watch type to filter categories — income type → income categories only, and vice versa
+  const selectedType = useWatch({ control: form.control, name: 'type' });
+  const filteredCategories = allCategories.filter(
+    (c) => c.kind === (selectedType as CategoryKind)
+  );
+
+  // When type changes, clear the category_id if it no longer belongs to the new kind
+  useEffect(() => {
+    const currentCategoryId = form.getValues('category_id');
+    if (!currentCategoryId) return;
+    const stillValid = filteredCategories.some((c) => c.id === currentCategoryId);
+    if (!stillValid) {
+      form.setValue('category_id', '', { shouldValidate: false });
+    }
+  }, [selectedType, filteredCategories, form]);
 
   useEffect(() => {
     form.reset({
@@ -120,15 +137,17 @@ export function TransactionForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {categories.map((category: any) => {
-                    const categoryId = String(category.id ?? category._id ?? '');
-
-                    return (
-                      <SelectItem key={categoryId} value={categoryId}>
+                  {filteredCategories.length === 0 ? (
+                    <div className="px-2 py-3 text-sm text-muted-foreground text-center">
+                      Chưa có danh mục {selectedType === 'income' ? 'thu nhập' : 'chi tiêu'}
+                    </div>
+                  ) : (
+                    filteredCategories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
-                    );
-                  })}
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -167,7 +186,7 @@ export function TransactionForm({
               <FormControl>
                 <Textarea
                   placeholder="Ví dụ: Ăn sáng phở"
-                  className="min-h-[100px] rounded-xl"
+                  className="min-h-25 rounded-xl"
                   name={field.name}
                   ref={field.ref}
                   value={field.value ?? ''}

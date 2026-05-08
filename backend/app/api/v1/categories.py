@@ -1,6 +1,7 @@
+from typing import Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Response, status
 from sqlalchemy.orm import Session
 
 from app.dependencies.auth import get_current_user
@@ -14,11 +15,11 @@ router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("", response_model=list[CategoryResponse])
 def list_my_categories(
+    kind: Literal["income", "expense"] | None = Query(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return CategoryService(db).list_my_categories(current_user)
-
+    return CategoryService(db).list_my_categories(current_user, kind)
 
 @router.post("", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
 def create_category(

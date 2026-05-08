@@ -1,13 +1,15 @@
 import { apiClient } from '@/shared/api';
 import type {
   Category,
+  CategoryKind,
   CreateCategoryInput,
   UpdateCategoryInput
 } from '../model/type';
 
 export const categoryApi = {
-  async getCategories(): Promise<Category[]> {
-    const { data } = await apiClient.get<Category[]>('/categories');
+  async getCategories(kind?: CategoryKind): Promise<Category[]> {
+    const params = kind ? { kind } : {};
+    const { data } = await apiClient.get<Category[]>('/categories', { params });
     return data;
   },
 
@@ -21,8 +23,7 @@ export const categoryApi = {
     return data;
   },
 
-  async deleteCategory(categoryId: string): Promise<{ message: string }> {
-    const { data } = await apiClient.delete<{ message: string }>(`/categories/${categoryId}`);
-    return data;
+  async deleteCategory(categoryId: string): Promise<void> {
+    await apiClient.delete(`/categories/${categoryId}`);
   }
 };

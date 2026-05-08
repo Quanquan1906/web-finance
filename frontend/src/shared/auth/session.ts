@@ -2,10 +2,8 @@ export interface SessionUser {
   id: string;
   email: string;
   full_name?: string | null;
-  name?: string | null;
-  roles?: string[];
   is_active: boolean;
-  created_at?: string | null;
+  created_at: string;
 }
 
 const KEY_ACCESS = "auth.access_token";

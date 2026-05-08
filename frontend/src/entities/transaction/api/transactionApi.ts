@@ -2,13 +2,19 @@ import { apiClient } from "@/shared/api";
 import type {
   CreateTransactionInput,
   Transaction,
+  TransactionListParams,
   TransactionListResponse,
   UpdateTransactionInput,
 } from "../model/types";
 
 export const transactionApi = {
-  getTransactions: async () => {
-    const { data } = await apiClient.get<TransactionListResponse>("/transactions");
+  getTransactions: async (params?: TransactionListParams) => {
+    const { data } = await apiClient.get<TransactionListResponse>("/transactions", { params });
+    return data;
+  },
+
+  getTransaction: async (id: string) => {
+    const { data } = await apiClient.get<Transaction>(`/transactions/${id}`);
     return data;
   },
 
@@ -22,8 +28,7 @@ export const transactionApi = {
     return data;
   },
 
-  deleteTransaction: async (id: string) => {
-    const { data } = await apiClient.delete<{ message: string }>(`/transactions/${id}`);
-    return data;
+  deleteTransaction: async (id: string): Promise<void> => {
+    await apiClient.delete(`/transactions/${id}`);
   },
 };

@@ -4,6 +4,7 @@ import {
   Home,
   LogOut,
   PieChart,
+  PiggyBank,
   Receipt,
   Settings2,
   Tags,
@@ -29,6 +30,13 @@ const financeManageItems = [
     title: 'Danh Mục',
     url: '/categories',
     icon: Tags,
+    children: [],
+    roles: []
+  },
+  {
+    title: 'Ngân Sách',
+    url: '/budgets',
+    icon: PiggyBank,
     children: [],
     roles: []
   },
