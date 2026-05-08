@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -26,7 +27,13 @@ def get_summary(
 def get_expense_by_category(
     date_from: date | None = Query(default=None),
     date_to: date | None = Query(default=None),
+    tx_type: Literal["income", "expense"] = Query(default="expense", alias="type"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    return ReportService(db).get_expense_by_category(current_user, date_from=date_from, date_to=date_to)
+    return ReportService(db).get_total_by_category(
+        current_user,
+        tx_type=tx_type,
+        date_from=date_from,
+        date_to=date_to,
+    )

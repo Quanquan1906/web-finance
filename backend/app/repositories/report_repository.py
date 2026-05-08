@@ -40,7 +40,13 @@ class ReportRepository:
             "balance": total_income - total_expense,
         }
 
-    def get_expense_by_category(self, user_id: UUID, date_from: date | None = None, date_to: date | None = None):
+    def get_total_by_category(
+        self,
+        user_id: UUID,
+        tx_type: str,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ):
         stmt = (
             select(
                 Category.id,
@@ -50,7 +56,7 @@ class ReportRepository:
             .join(Category, Category.id == Transaction.category_id)
             .where(
                 Transaction.user_id == user_id,
-                Transaction.type == "expense",
+                Transaction.type == tx_type,
             )
         )
         if date_from is not None:
@@ -64,3 +70,11 @@ class ReportRepository:
         )
         
         return self.db.execute(stmt).all()
+
+    def get_expense_by_category(self, user_id: UUID, date_from: date | None = None, date_to: date | None = None):
+        return self.get_total_by_category(
+            user_id=user_id,
+            tx_type="expense",
+            date_from=date_from,
+            date_to=date_to,
+        )
