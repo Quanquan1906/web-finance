@@ -1,19 +1,27 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from "lucide-react";
-import { useTransactionsQuery } from "@/entities/transaction";
+import { useDashboardQuery, type DashboardPreset } from "@/entities/dashboard";
 import { formatCurrency } from "@/shared/lib/formatCurrency";
+import { formatDate } from "@/shared/lib/formatDate";
 import { cn } from "@/shared/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+import { Progress } from "@/shared/ui/progress";
 
 interface StatCardProps {
   label: string;
   value: string;
   icon: React.ReactNode;
-  trend?: string;
   colorClass: string;
   bgClass: string;
 }
 
-function StatCard({ label, value, icon, trend, colorClass, bgClass }: StatCardProps) {
+function StatCard({ label, value, icon, colorClass, bgClass }: StatCardProps) {
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between">
@@ -24,38 +32,52 @@ function StatCard({ label, value, icon, trend, colorClass, bgClass }: StatCardPr
       </div>
       <div className="space-y-1">
         <p className={cn("text-2xl font-bold tracking-tight", colorClass)}>{value}</p>
-        {trend && <p className="text-xs text-muted-foreground">{trend}</p>}
       </div>
     </div>
   );
 }
 
+const PRESET_LABELS: Record<DashboardPreset, string> = {
+  current_month: "Tháng này",
+  current_year: "Năm này",
+  last_15_days: "15 ngày qua",
+};
+
 export function DashboardPage() {
-  const { data: transactionsData, isLoading } = useTransactionsQuery();
-  const transactions = transactionsData?.items ?? [];
+  const [preset, setPreset] = useState<DashboardPreset>("current_month");
+  const { data, isLoading, isError } = useDashboardQuery({ preset });
 
-  const stats = useMemo(() => {
-    const totalIncome = transactions
-      .filter((t) => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0);
+  const summary = data?.summary;
+  const recentTransactions = data?.recent_transactions ?? [];
+  const expenseByCategory = data?.expense_by_category ?? [];
+  const budgetProgress = data?.budget_progress ?? [];
 
-    const totalExpense = transactions
-      .filter((t) => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    const balance = totalIncome - totalExpense;
-
-    return { totalIncome, totalExpense, balance };
-  }, [transactions]);
+  const balance = parseFloat(summary?.balance ?? "0");
+  const totalIncome = parseFloat(summary?.total_income ?? "0");
+  const totalExpense = parseFloat(summary?.total_expense ?? "0");
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Tổng quan tài chính</h1>
-        <p className="text-sm text-muted-foreground">
-          Theo dõi thu chi và số dư tài khoản của bạn
-        </p>
+      {/* Header + preset filter */}
+      <div className="flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Tổng quan tài chính</h1>
+          <p className="text-sm text-muted-foreground">
+            Theo dõi thu chi và số dư tài khoản của bạn
+          </p>
+        </div>
+        <Select value={preset} onValueChange={(v) => setPreset(v as DashboardPreset)}>
+          <SelectTrigger className="w-40 rounded-xl">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {(Object.keys(PRESET_LABELS) as DashboardPreset[]).map((key) => (
+              <SelectItem key={key} value={key}>
+                {PRESET_LABELS[key]}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Stats grid */}
@@ -65,36 +87,106 @@ export function DashboardPage() {
             <div key={i} className="h-28 animate-pulse rounded-2xl border bg-muted" />
           ))}
         </div>
+      ) : isError ? (
+        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-sm text-destructive">
+          Không thể tải dữ liệu. Vui lòng thử lại.
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <StatCard
-            label="Số dư hiện tại"
-            value={formatCurrency(stats.balance)}
+            label="Số dư"
+            value={formatCurrency(balance)}
             icon={<Wallet className="h-4.5 w-4.5" />}
-            trend={`Từ ${transactions.length} giao dịch`}
-            colorClass={stats.balance >= 0 ? "text-emerald-600" : "text-destructive"}
-            bgClass={stats.balance >= 0 ? "bg-emerald-50" : "bg-destructive/10"}
+            colorClass={balance >= 0 ? "text-emerald-600" : "text-destructive"}
+            bgClass={balance >= 0 ? "bg-emerald-50" : "bg-destructive/10"}
           />
           <StatCard
             label="Tổng thu nhập"
-            value={formatCurrency(stats.totalIncome)}
+            value={formatCurrency(totalIncome)}
             icon={<ArrowUpCircle className="h-4.5 w-4.5" />}
-            trend={`${transactions.filter((t) => t.type === "income").length} khoản thu`}
             colorClass="text-emerald-600"
             bgClass="bg-emerald-50"
           />
           <StatCard
             label="Tổng chi tiêu"
-            value={formatCurrency(stats.totalExpense)}
+            value={formatCurrency(totalExpense)}
             icon={<ArrowDownCircle className="h-4.5 w-4.5" />}
-            trend={`${transactions.filter((t) => t.type === "expense").length} khoản chi`}
             colorClass="text-destructive"
             bgClass="bg-destructive/10"
           />
         </div>
       )}
 
-      {/* Recent transactions preview */}
+      {/* Expense by category + Budget progress */}
+      {!isLoading && !isError && (
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {/* Expense by category */}
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="mb-4 text-base font-semibold text-foreground">Chi tiêu theo danh mục</h2>
+            {expenseByCategory.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                Không có dữ liệu chi tiêu
+              </p>
+            ) : (
+              <div className="divide-y divide-border">
+                {expenseByCategory.map((item) => (
+                  <div key={item.category_id} className="flex items-center justify-between py-2.5">
+                    <span className="text-sm text-foreground">{item.category_name}</span>
+                    <span className="text-sm font-semibold text-destructive">
+                      -{formatCurrency(parseFloat(item.total))}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Budget progress */}
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="mb-4 text-base font-semibold text-foreground">Tiến độ ngân sách</h2>
+            {budgetProgress.length === 0 ? (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                {preset !== "current_month"
+                  ? "Tiến độ ngân sách chỉ hiển thị trong chế độ tháng này"
+                  : "Chưa thiết lập ngân sách"}
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {budgetProgress.map((item) => {
+                  const pct = Math.min(parseFloat(item.percentage_used), 100);
+                  return (
+                    <div key={item.budget_id} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span
+                          className={cn(
+                            "font-medium",
+                            item.is_over_budget ? "text-destructive" : "text-foreground"
+                          )}
+                        >
+                          {item.category_name}
+                          {item.is_over_budget && (
+                            <span className="ml-1.5 text-xs font-normal">(Vượt ngân sách)</span>
+                          )}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {formatCurrency(parseFloat(item.spent))} /{" "}
+                          {formatCurrency(parseFloat(item.amount_limit))}
+                        </span>
+                      </div>
+                      <Progress
+                        value={pct}
+                        className={cn(item.is_over_budget ? "[&>div]:bg-destructive" : "")}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Recent transactions */}
       <div className="rounded-2xl border border-border bg-card p-5 shadow-sm">
         <h2 className="mb-4 text-base font-semibold text-foreground">Giao dịch gần đây</h2>
         {isLoading ? (
@@ -103,7 +195,7 @@ export function DashboardPage() {
               <div key={i} className="h-10 animate-pulse rounded-xl bg-muted" />
             ))}
           </div>
-        ) : transactions.length === 0 ? (
+        ) : recentTransactions.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center">
             <Wallet className="h-10 w-10 text-muted-foreground/40" />
             <p className="text-sm font-medium text-muted-foreground">Chưa có giao dịch nào</p>
@@ -111,7 +203,7 @@ export function DashboardPage() {
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {transactions.slice(0, 5).map((t) => (
+            {recentTransactions.map((t) => (
               <div key={t.id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <div
@@ -128,7 +220,7 @@ export function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-foreground">{t.note || "Giao dịch"}</p>
-                    <p className="text-xs text-muted-foreground">{t.date}</p>
+                    <p className="text-xs text-muted-foreground">{formatDate(t.transaction_date)}</p>
                   </div>
                 </div>
                 <span
@@ -138,7 +230,7 @@ export function DashboardPage() {
                   )}
                 >
                   {t.type === "income" ? "+" : "-"}
-                  {formatCurrency(t.amount)}
+                  {formatCurrency(parseFloat(String(t.amount)))}
                 </span>
               </div>
             ))}

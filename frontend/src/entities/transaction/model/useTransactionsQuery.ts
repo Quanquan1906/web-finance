@@ -1,14 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { transactionApi } from '../api/transactionApi';
+import type { TransactionListParams } from './types';
 
 export const transactionQueryKeys = {
-  all: ['transactions'] as const
+  all: ['transactions'] as const,
+  list: (params?: TransactionListParams) => [...transactionQueryKeys.all, 'list', params] as const,
 };
 
-export function useTransactionsQuery() {
+export function useTransactionsQuery(params?: TransactionListParams) {
   return useQuery({
-    queryKey: transactionQueryKeys.all,
-    queryFn: transactionApi.getTransactions
+    queryKey: transactionQueryKeys.list(params),
+    queryFn: () => transactionApi.getTransactions(params),
   });
 }
 
@@ -19,7 +21,7 @@ export function useCreateTransactionMutation() {
     mutationFn: transactionApi.createTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
-    }
+    },
   });
 }
 
@@ -35,17 +37,16 @@ export function useUpdateTransactionMutation() {
     }) => transactionApi.updateTransaction(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
-    }
+    },
   });
 }
 
 export function useDeleteTransactionMutation() {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (id: string) => transactionApi.deleteTransaction(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
-    }
+    },
   });
 }

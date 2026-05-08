@@ -8,6 +8,7 @@ const routeLabels: Record<string, string> = {
   "/dashboard": "Dashboard",
   "/transactions": "Giao dịch",
   "/categories": "Danh mục",
+  "/budgets": "Ngân sách",
   "/analytics": "Thống kê",
   "/assistant": "AI Trợ lý",
   "/dashboard/settings": "Cài đặt",

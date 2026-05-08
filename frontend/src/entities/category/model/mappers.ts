@@ -1,14 +1,10 @@
 import { Category, CategoryCardViewModel } from './type';
 
-export function toCategoryCardViewModel(
-  category: Category,
-  transactionCount = 0
-): CategoryCardViewModel {
+export function toCategoryCardViewModel(category: Category): CategoryCardViewModel {
   return {
     id: category.id,
     name: category.name,
-    icon: category.icon,
-    color: category.color,
-    transactionCount
+    kind: category.kind,
+    transaction_count: category.transaction_count,
   };
 }

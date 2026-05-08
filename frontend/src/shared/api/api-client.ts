@@ -37,7 +37,7 @@ apiClient.interceptors.response.use(
     }
 
     // Không refresh lại nếu chính request refresh bị lỗi
-    if (original?.url?.includes('/api/v1/auth/refresh')) {
+    if (original?.url?.includes('/auth/refresh')) {
       session.clear();
       window.dispatchEvent(new Event('auth:unauthorized'));
       return Promise.reject(error);
@@ -61,7 +61,7 @@ apiClient.interceptors.response.use(
         console.log('[refresh] start with token:', refreshToken);
 
         refreshPromise = refreshClient
-          .post('/api/v1/auth/refresh', {
+          .post('/auth/refresh', {
             refresh_token: refreshToken
           })
           .then((r) => {

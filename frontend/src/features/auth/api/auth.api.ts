@@ -5,34 +5,33 @@ import type {
   LoginRequest,
   RefreshTokenResponse,
   RegisterRequest,
-  LogoutResponse,
 } from "../model/types";
 
 export const authApi = {
   register: (payload: RegisterRequest) =>
     apiClient
-      .post<AuthResponse>("/api/v1/auth/register", payload)
+      .post<AuthResponse>("/auth/register", payload)
       .then((r) => r.data),
 
   login: (payload: LoginRequest) =>
     apiClient
-      .post<AuthResponse>("/api/v1/auth/login", payload)
+      .post<AuthResponse>("/auth/login", payload)
       .then((r) => r.data),
 
   refresh: (refreshToken: string) =>
     apiClient
-      .post<RefreshTokenResponse>("/api/v1/auth/refresh", {
+      .post<RefreshTokenResponse>("/auth/refresh", {
         refresh_token: refreshToken,
       })
       .then((r) => r.data),
 
   logout: (refreshToken: string) =>
     apiClient
-      .post<LogoutResponse>("/api/v1/auth/logout", {
+      .post<void>("/auth/logout", {
         refresh_token: refreshToken,
       })
-      .then((r) => r.data),
+      .then(() => undefined),
 
   me: () =>
-    apiClient.get<User>("/api/v1/auth/me").then((r) => r.data),
+    apiClient.get<User>("/users/me").then((r) => r.data),
 };

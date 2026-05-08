@@ -89,7 +89,7 @@ export function TransactionsTable({
                   </TableCell>
 
                   <TableCell className="px-4 py-3.5 text-sm text-muted-foreground">
-                    {formatDate(transaction.date)}
+                    {formatDate(transaction.transaction_date)}
                   </TableCell>
 
                   <TableCell className="px-4 py-3.5 text-right">

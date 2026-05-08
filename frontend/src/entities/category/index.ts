@@ -5,6 +5,7 @@ export { toCategoryCardViewModel } from './model/mappers';
 export { CategoryCard } from './ui/CategoryCard';
 export type {
   Category,
+  CategoryKind,
   CategoryListResponse,
   CreateCategoryInput,
   UpdateCategoryInput,
@@ -16,5 +17,4 @@ export {
   type CategoryFormValues
 } from './model/categoryFormSchema';
 
-export { CATEGORY_COLOR_OPTIONS, type CategoryColorOption } from './model/categoryColorOptions';
 export { CategoryForm } from './ui/CategoryForm';

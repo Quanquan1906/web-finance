@@ -55,12 +55,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     session.setAccessToken(res.access_token);
     session.setRefreshToken(res.refresh_token);
-    session.setUser(res.user);
+
+    const user = await authApi.me();
+    session.setUser(user);
 
     set({
       accessToken: res.access_token,
       refreshToken: res.refresh_token,
-      user: res.user,
+      user,
     });
   },
 
@@ -69,12 +71,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     session.setAccessToken(res.access_token);
     session.setRefreshToken(res.refresh_token);
-    session.setUser(res.user);
+
+    const user = await authApi.me();
+    session.setUser(user);
 
     set({
       accessToken: res.access_token,
       refreshToken: res.refresh_token,
-      user: res.user,
+      user,
     });
   },
 

@@ -1,34 +1,28 @@
+export type CategoryKind = 'income' | 'expense';
+
 export interface Category {
   id: string;
-  name: string;
-  icon: string;
-  color: string;
-  is_default: boolean;
   user_id: string;
+  name: string;
+  kind: CategoryKind;
   created_at: string;
-  updated_at: string;
+  transaction_count: number;
 }
 
-export interface CategoryListResponse {
-  items: Category[];
-}
+export type CategoryListResponse = Category[];
 
 export interface CreateCategoryInput {
   name: string;
-  icon: string;
-  color: string;
+  kind: CategoryKind;
 }
 
 export interface UpdateCategoryInput {
-  name?: string;
-  icon?: string;
-  color?: string;
+  name: string;
 }
 
 export interface CategoryCardViewModel {
   id: string;
   name: string;
-  icon: string;
-  color: string;
-  transactionCount: number;
+  kind: CategoryKind;
+  transaction_count: number;
 }

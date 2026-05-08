@@ -12,9 +12,8 @@ export const transactionFormSchema = z.object({
       message: "Số tiền phải lớn hơn 0",
     }),
   type: z.enum(["income", "expense"]),
-  date: z.string().min(1, "Vui lòng chọn ngày"),
+  transaction_date: z.string().min(1, "Vui lòng chọn ngày"),
   note: z.string().optional(),
-  source: z.enum(["manual", "nlp", "ocr"]),
 });
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;

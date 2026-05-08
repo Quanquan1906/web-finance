@@ -16,7 +16,7 @@ export function CategoriesGrid({
       {categories.map((category) => (
         <CategoryCard
           key={category.id}
-          category={toCategoryCardViewModel(category, 0)}
+          category={toCategoryCardViewModel(category)}
           onEdit={onEdit}
           onDelete={onDelete}
         />
