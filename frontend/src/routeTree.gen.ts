@@ -16,6 +16,7 @@ import { Route as dashboardDashboardTransactionsRouteImport } from './app/router
 import { Route as dashboardDashboardDashboardRouteImport } from './app/router/(dashboard)/_dashboard.dashboard'
 import { Route as dashboardDashboardCategoriesRouteImport } from './app/router/(dashboard)/_dashboard.categories'
 import { Route as dashboardDashboardBudgetsRouteImport } from './app/router/(dashboard)/_dashboard.budgets'
+import { Route as dashboardDashboardAssistantRouteImport } from './app/router/(dashboard)/_dashboard.assistant'
 import { Route as dashboardDashboardAnalyticsRouteImport } from './app/router/(dashboard)/_dashboard.analytics'
 import { Route as authAuthRegisterRouteImport } from './app/router/(auth)/_auth.register'
 import { Route as authAuthLoginRouteImport } from './app/router/(auth)/_auth.login'
@@ -57,6 +58,12 @@ const dashboardDashboardBudgetsRoute =
     path: '/budgets',
     getParentRoute: () => dashboardDashboardRoute,
   } as any)
+const dashboardDashboardAssistantRoute =
+  dashboardDashboardAssistantRouteImport.update({
+    id: '/assistant',
+    path: '/assistant',
+    getParentRoute: () => dashboardDashboardRoute,
+  } as any)
 const dashboardDashboardAnalyticsRoute =
   dashboardDashboardAnalyticsRouteImport.update({
     id: '/analytics',
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
   '/analytics': typeof dashboardDashboardAnalyticsRoute
+  '/assistant': typeof dashboardDashboardAssistantRoute
   '/budgets': typeof dashboardDashboardBudgetsRoute
   '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
   '/analytics': typeof dashboardDashboardAnalyticsRoute
+  '/assistant': typeof dashboardDashboardAssistantRoute
   '/budgets': typeof dashboardDashboardBudgetsRoute
   '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardRoute
@@ -102,6 +111,7 @@ export interface FileRoutesById {
   '/(auth)/_auth/login': typeof authAuthLoginRoute
   '/(auth)/_auth/register': typeof authAuthRegisterRoute
   '/(dashboard)/_dashboard/analytics': typeof dashboardDashboardAnalyticsRoute
+  '/(dashboard)/_dashboard/assistant': typeof dashboardDashboardAssistantRoute
   '/(dashboard)/_dashboard/budgets': typeof dashboardDashboardBudgetsRoute
   '/(dashboard)/_dashboard/categories': typeof dashboardDashboardCategoriesRoute
   '/(dashboard)/_dashboard/dashboard': typeof dashboardDashboardDashboardRoute
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/analytics'
+    | '/assistant'
     | '/budgets'
     | '/categories'
     | '/dashboard'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/analytics'
+    | '/assistant'
     | '/budgets'
     | '/categories'
     | '/dashboard'
@@ -136,6 +148,7 @@ export interface FileRouteTypes {
     | '/(auth)/_auth/login'
     | '/(auth)/_auth/register'
     | '/(dashboard)/_dashboard/analytics'
+    | '/(dashboard)/_dashboard/assistant'
     | '/(dashboard)/_dashboard/budgets'
     | '/(dashboard)/_dashboard/categories'
     | '/(dashboard)/_dashboard/dashboard'
@@ -199,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardDashboardBudgetsRouteImport
       parentRoute: typeof dashboardDashboardRoute
     }
+    '/(dashboard)/_dashboard/assistant': {
+      id: '/(dashboard)/_dashboard/assistant'
+      path: '/assistant'
+      fullPath: '/assistant'
+      preLoaderRoute: typeof dashboardDashboardAssistantRouteImport
+      parentRoute: typeof dashboardDashboardRoute
+    }
     '/(dashboard)/_dashboard/analytics': {
       id: '/(dashboard)/_dashboard/analytics'
       path: '/analytics'
@@ -239,6 +259,7 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 
 interface dashboardDashboardRouteChildren {
   dashboardDashboardAnalyticsRoute: typeof dashboardDashboardAnalyticsRoute
+  dashboardDashboardAssistantRoute: typeof dashboardDashboardAssistantRoute
   dashboardDashboardBudgetsRoute: typeof dashboardDashboardBudgetsRoute
   dashboardDashboardCategoriesRoute: typeof dashboardDashboardCategoriesRoute
   dashboardDashboardDashboardRoute: typeof dashboardDashboardDashboardRoute
@@ -247,6 +268,7 @@ interface dashboardDashboardRouteChildren {
 
 const dashboardDashboardRouteChildren: dashboardDashboardRouteChildren = {
   dashboardDashboardAnalyticsRoute: dashboardDashboardAnalyticsRoute,
+  dashboardDashboardAssistantRoute: dashboardDashboardAssistantRoute,
   dashboardDashboardBudgetsRoute: dashboardDashboardBudgetsRoute,
   dashboardDashboardCategoriesRoute: dashboardDashboardCategoriesRoute,
   dashboardDashboardDashboardRoute: dashboardDashboardDashboardRoute,
