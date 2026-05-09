@@ -12,6 +12,7 @@ from app.api.v1.transactions import router as transactions_router
 from app.api.v1.reports import router as reports_router
 from app.api.v1.budgets import router as budgets_router
 from app.api.v1.dashboard import router as dashboard_router
+from app.api.v1.statistics import router as statistics_router
 
 api_router = APIRouter()
 
@@ -37,3 +38,5 @@ api_router.include_router(reports_router)
 api_router.include_router(budgets_router)
 
 api_router.include_router(dashboard_router)
+
+api_router.include_router(statistics_router)

@@ -18,10 +18,9 @@ export type DashboardFilters =
 
 // Decimal fields from BE serialize as strings in JSON
 export interface DashboardSummary {
-  current_balance: string;
-  period_balance: string;
   total_income: string;
   total_expense: string;
+  period_balance: string;
 }
 
 export interface ExpenseByCategoryItem {

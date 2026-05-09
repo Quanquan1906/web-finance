@@ -8,10 +8,9 @@ from app.schemas.transaction import TransactionResponse
 
 
 class DashboardSummaryResponse(BaseModel):
-    current_balance: Decimal
-    period_balance: Decimal
     total_income: Decimal
     total_expense: Decimal
+    period_balance: Decimal
 
 
 class DashboardOverviewResponse(BaseModel):

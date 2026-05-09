@@ -1,10 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import { dashboardQueryKeys } from '@/entities/dashboard';
 import { transactionApi } from '../api/transactionApi';
 import type { TransactionListParams } from './types';
 
 export const transactionQueryKeys = {
   all: ['transactions'] as const,
-  list: (params?: TransactionListParams) => [...transactionQueryKeys.all, 'list', params] as const,
+  list: (params?: TransactionListParams) =>
+    [...transactionQueryKeys.all, 'list', params] as const,
 };
 
 export function useTransactionsQuery(params?: TransactionListParams) {
@@ -21,32 +24,39 @@ export function useCreateTransactionMutation() {
     mutationFn: transactionApi.createTransaction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
     },
   });
 }
 
 export function useUpdateTransactionMutation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: ({
       id,
-      payload
+      payload,
     }: {
       id: string;
       payload: Parameters<typeof transactionApi.updateTransaction>[1];
     }) => transactionApi.updateTransaction(id, payload),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
     },
   });
 }
 
 export function useDeleteTransactionMutation() {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (id: string) => transactionApi.deleteTransaction(id),
+
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
     },
   });
 }

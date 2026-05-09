@@ -11,7 +11,7 @@ from app.core.db import Base
 class Category(Base):
     __tablename__ = "categories"
     __table_args__ = (
-        UniqueConstraint("user_id", "name", name="uq_categories_user_id_name"),
+        UniqueConstraint("user_id", "name", "kind", name="uq_categories_user_id_name_kind"),
     )
 
     id: Mapped[PyUUID] = mapped_column(

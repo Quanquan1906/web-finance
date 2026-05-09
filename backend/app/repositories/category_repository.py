@@ -61,10 +61,26 @@ class CategoryRepository:
         )
         return self.db.scalar(stmt)
 
-    def get_by_name_for_user(self, user_id: UUID, name: str) -> Category | None:
+    def get_by_name_for_user(self, user_id: UUID, name: str, kind: CategoryKind) -> Category | None:
         stmt = select(Category).where(
             Category.user_id == user_id,
             Category.name == name.strip(),
+            Category.kind == kind,
+        )
+        return self.db.scalar(stmt)
+    
+    def get_duplicate_for_update(
+        self,
+        user_id: UUID,
+        category_id: UUID,
+        name: str,
+        kind: CategoryKind,
+    ) -> Category | None:
+        stmt = select(Category).where(
+            Category.user_id == user_id,
+            Category.id != category_id,
+            Category.name == name.strip(),
+            Category.kind == kind,
         )
         return self.db.scalar(stmt)
 

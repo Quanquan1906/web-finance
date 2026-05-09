@@ -20,7 +20,7 @@ export function SidebarAccount() {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
-  const name = user?.name ?? user?.email ?? 'Guest';
+  const name = user?.full_name ?? user?.email ?? 'Guest';
   const email = user?.email ?? '';
   const initials = name
     .split(' ')

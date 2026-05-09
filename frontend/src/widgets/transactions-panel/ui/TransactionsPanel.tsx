@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { useCategoriesQuery } from '@/entities/category';
 import { useTransactionsQuery, type Transaction } from '@/entities/transaction';
 import { CreateTransactionDialog } from '@/features/transaction/create-transaction';
 import { DeleteTransactionDialog } from '@/features/transaction/delete-transaction';
 import { EditTransactionDialog } from '@/features/transaction/edit-transaction';
+import { useTransactionTableState } from '../model/use-transaction-table-state';
 import { TransactionsActions } from './TransactionsActions';
 import { TransactionsTable } from './TransactionsTable';
 import { TransactionsToolbar } from './TransactionsToolbar';
@@ -17,13 +18,21 @@ type CategoryLite = {
 };
 
 export function TransactionsPanel() {
-  const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const {
+    search,
+    setSearch,
+    categoryFilter,
+    setCategoryFilter,
+    createOpen,
+    setCreateOpen,
+    editOpen,
+    deleteOpen,
+    selectedTransaction,
+    openEdit,
+    openDelete,
+    closeEdit,
+    closeDelete,
+  } = useTransactionTableState();
 
   const { data: transactionsData, isLoading, isError } = useTransactionsQuery();
   const { data: categoriesData } = useCategoriesQuery();
@@ -73,9 +82,7 @@ export function TransactionsPanel() {
   return (
     <div className="space-y-3">
       <TransactionsActions
-        onOpenCreate={() => {
-          setCreateOpen(true);
-        }}
+        onOpenCreate={() => setCreateOpen(true)}
         onOpenNlp={() => {
           console.log('open nlp');
         }}
@@ -92,38 +99,13 @@ export function TransactionsPanel() {
       <TransactionsTable
         transactions={filteredTransactions}
         categoryMap={categoryMap}
-        onEdit={(transaction) => {
-          setSelectedTransaction(transaction);
-          setEditOpen(true);
-        }}
-        onDelete={(transaction) => {
-          setSelectedTransaction(transaction);
-          setDeleteOpen(true);
-        }}
+        onEdit={openEdit}
+        onDelete={openDelete}
       />
 
       <CreateTransactionDialog open={createOpen} onOpenChange={setCreateOpen} />
-
-      <EditTransactionDialog
-        open={editOpen}
-        onOpenChange={(open) => {
-          setEditOpen(open);
-          if (!open) {
-            setSelectedTransaction(null);
-          }
-        }}
-        transaction={selectedTransaction}
-      />
-      <DeleteTransactionDialog
-        open={deleteOpen}
-        onOpenChange={(open) => {
-          setDeleteOpen(open);
-          if (!open) {
-            setSelectedTransaction(null);
-          }
-        }}
-        transaction={selectedTransaction}
-      />
+      <EditTransactionDialog open={editOpen} onOpenChange={closeEdit} transaction={selectedTransaction} />
+      <DeleteTransactionDialog open={deleteOpen} onOpenChange={closeDelete} transaction={selectedTransaction} />
     </div>
   );
 }

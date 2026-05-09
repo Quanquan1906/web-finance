@@ -18,6 +18,39 @@ interface EditTransactionDialogProps {
   transaction: Transaction | null;
 }
 
+function normalizeDateInputValue(value?: string | null) {
+  if (!value) return '';
+
+  if (value.includes('T')) {
+    return value.slice(0, 10);
+  }
+
+  return value;
+}
+
+function normalizeTransactionType(transaction: any): 'income' | 'expense' | '' {
+  const rawType =
+    transaction?.type ??
+    transaction?.transaction_type ??
+    transaction?.kind ??
+    '';
+
+  if (rawType === 'income' || rawType === 'expense') {
+    return rawType;
+  }
+
+  return '';
+}
+
+function normalizeCategoryId(transaction: any): string {
+  return (
+    transaction?.category_id ??
+    transaction?.category?.id ??
+    transaction?.categoryId ??
+    ''
+  );
+}
+
 export function EditTransactionDialog({
   open,
   onOpenChange,
@@ -29,13 +62,18 @@ export function EditTransactionDialog({
   const defaultValues = useMemo(() => {
     if (!transaction) return undefined;
 
-    return {
-      category_id: transaction.category_id,
-      amount: String(transaction.amount),
-      type: transaction.type,
-      transaction_date: transaction.transaction_date,
+    const normalized = {
+      category_id: normalizeCategoryId(transaction),
+      amount: String(transaction.amount ?? ''),
+      type: normalizeTransactionType(transaction),
+      transaction_date: normalizeDateInputValue(transaction.transaction_date),
       note: transaction.note ?? '',
     };
+
+    console.log('[EditTransactionDialog] transaction:', transaction);
+    console.log('[EditTransactionDialog] defaultValues:', normalized);
+
+    return normalized;
   }, [transaction]);
 
   const handleSubmit = async (values: TransactionFormValues) => {
@@ -55,7 +93,7 @@ export function EditTransactionDialog({
       onOpenChange(false);
     } catch (error: any) {
       setSubmitError(
-        error?.response?.data?.detail || 'Không thể cập nhật giao dịch.'
+        error?.response?.data?.detail || 'Không thể cập nhật giao dịch.',
       );
     }
   };
@@ -78,8 +116,9 @@ export function EditTransactionDialog({
           </div>
         ) : null}
 
-        {transaction ? (
+        {transaction && defaultValues ? (
           <TransactionForm
+            key={`${transaction.id}-${defaultValues.type}-${defaultValues.category_id}`}
             defaultValues={defaultValues}
             isSubmitting={isPending}
             submitText="Cập nhật giao dịch"
