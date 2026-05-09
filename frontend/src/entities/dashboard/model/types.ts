@@ -1,16 +1,27 @@
-export type DashboardPreset = 'current_month' | 'current_year' | 'last_15_days';
+import { BudgetProgressItem } from '@/entities/budget';
+export type DashboardPeriod = 'day' | 'month' | 'year';
 
-export interface DashboardFilters {
-  preset?: DashboardPreset;
-  date_from?: string;
-  date_to?: string;
-}
+export type DashboardFilters =
+  | {
+      period: 'day';
+      date: string; // YYYY-MM-DD
+    }
+  | {
+      period: 'month';
+      month: number; // 1 - 12
+      year: number;
+    }
+  | {
+      period: 'year';
+      year: number;
+    };
 
 // Decimal fields from BE serialize as strings in JSON
 export interface DashboardSummary {
+  current_balance: string;
+  period_balance: string;
   total_income: string;
   total_expense: string;
-  balance: string;
 }
 
 export interface ExpenseByCategoryItem {
@@ -18,9 +29,6 @@ export interface ExpenseByCategoryItem {
   category_name: string;
   total: string;
 }
-
-// Re-exported from entities/budget to avoid duplication
-export type { BudgetProgressItem } from '@/entities/budget';
 
 export interface DashboardRecentTransaction {
   id: string;

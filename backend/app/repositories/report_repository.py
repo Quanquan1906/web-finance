@@ -28,8 +28,8 @@ class ReportRepository:
             expense_stmt = expense_stmt.where(Transaction.transaction_date >= date_from)
 
         if date_to is not None:
-            income_stmt = income_stmt.where(Transaction.transaction_date <= date_to)
-            expense_stmt = expense_stmt.where(Transaction.transaction_date <= date_to)
+            income_stmt = income_stmt.where(Transaction.transaction_date < date_to)
+            expense_stmt = expense_stmt.where(Transaction.transaction_date < date_to)
 
         total_income = self.db.scalar(income_stmt) or Decimal("0")
         total_expense = self.db.scalar(expense_stmt) or Decimal("0")
@@ -61,15 +61,29 @@ class ReportRepository:
         )
         if date_from is not None:
             stmt = stmt.where(Transaction.transaction_date >= date_from)
-        
+
         if date_to is not None:
-            stmt = stmt.where(Transaction.transaction_date <= date_to)
+            stmt = stmt.where(Transaction.transaction_date < date_to)
 
         stmt = stmt.group_by(Category.id, Category.name).order_by(
             func.sum(Transaction.amount).desc()
         )
         
         return self.db.execute(stmt).all()
+
+    def get_current_balance(self, user_id: UUID) -> Decimal:
+        """All-time balance: sum of all income minus sum of all expense."""
+        income_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
+            Transaction.user_id == user_id,
+            Transaction.type == "income",
+        )
+        expense_stmt = select(func.coalesce(func.sum(Transaction.amount), 0)).where(
+            Transaction.user_id == user_id,
+            Transaction.type == "expense",
+        )
+        total_income = self.db.scalar(income_stmt) or Decimal("0")
+        total_expense = self.db.scalar(expense_stmt) or Decimal("0")
+        return total_income - total_expense
 
     def get_expense_by_category(self, user_id: UUID, date_from: date | None = None, date_to: date | None = None):
         return self.get_total_by_category(

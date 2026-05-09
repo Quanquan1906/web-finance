@@ -11,6 +11,9 @@ class ReportService:
         self.db = db
         self.report_repo = ReportRepository(db)
 
+    def get_current_balance(self, current_user: User):
+        return self.report_repo.get_current_balance(current_user.id)
+
     def get_summary(
         self,
         current_user: User,
