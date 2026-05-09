@@ -1,9 +1,8 @@
+import { Separator } from "@/shared/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/shared/ui/sidebar";
-import { AppSidebar } from "@/widgets/sidebar/ui/AppSidebar";
-import { NotificationBell } from "@/widgets/notifications";
+import { AppSidebar } from "@/widgets/app-shell/ui/AppSidebar";
 import { AssistantChatWidget } from "@/widgets/assistant-chat";
 import { useRouterState } from "@tanstack/react-router";
-import { Separator } from "@/shared/ui/separator";
 
 const routeLabels: Record<string, string> = {
   "/dashboard": "Dashboard",
@@ -12,7 +11,6 @@ const routeLabels: Record<string, string> = {
   "/budgets": "Ngân sách",
   "/analytics": "Thống kê",
   "/assistant": "AI Trợ lý",
-  "/dashboard/settings": "Cài đặt",
 };
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -34,10 +32,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <SidebarTrigger className="-ml-1 text-muted-foreground hover:text-foreground" />
             <Separator orientation="vertical" className="h-5" />
             <span className="text-sm font-semibold text-foreground">{pageTitle}</span>
-
-            <div className="ml-auto flex items-center gap-2">
-              <NotificationBell />
-            </div>
           </header>
 
           {/* Page content */}

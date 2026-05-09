@@ -38,6 +38,7 @@ class CategoryService:
         existing = self.category_repo.get_by_name_for_user(
             current_user.id,
             payload.name,
+            payload.kind,
         )
         if existing:
             raise HTTPException(
@@ -78,14 +79,17 @@ class CategoryService:
                 detail="Category not found",
             )
 
-        existing = self.category_repo.get_by_name_for_user(
-            current_user.id,
-            payload.name,
+        duplicate = self.category_repo.get_duplicate_for_update(
+            user_id=current_user.id,
+            category_id=category.id,
+            name=payload.name,
+            kind=category.kind,
         )
-        if existing and existing.id != category.id:
+
+        if duplicate:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Category already exists",
+                detail="Category already exists in this kind",
             )
 
         try:

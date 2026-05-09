@@ -34,10 +34,7 @@ class DashboardService:
             year=year,
         )
 
-        # 1) All-time balance (not affected by period filter)
-        current_balance = self.report_service.get_current_balance(current_user)
-
-        # 2) Period income / expense
+        # 1) Period income / expense
         period_data = self.report_service.get_summary(
             current_user=current_user,
             date_from=start_date,
@@ -47,20 +44,19 @@ class DashboardService:
         total_expense = period_data["total_expense"]
 
         summary = DashboardSummaryResponse(
-            current_balance=current_balance,
-            period_balance=total_income - total_expense,
             total_income=total_income,
             total_expense=total_expense,
+            period_balance=total_income - total_expense,
         )
 
-        # 3) Expense by category in period
+        # 2) Expense by category in period
         expense_by_category = self.report_service.get_expense_by_category(
             current_user=current_user,
             date_from=start_date,
             date_to=end_date,
         )
 
-        # 4) Budget progress — only relevant for month view
+        # 3) Budget progress — only relevant for month view
         budget_progress = []
         if period == "month":
             budget_progress = self.budget_service.get_budget_progress(
@@ -69,7 +65,7 @@ class DashboardService:
                 month=start_date.month,
             )
 
-        # 5) 5 most recent transactions in the period
+        # 4) 5 most recent transactions in the period
         recent_transactions_page = self.transaction_service.list_my_transactions(
             current_user=current_user,
             date_from=start_date,
