@@ -35,8 +35,8 @@ class TransactionRepository:
             count_stmt = count_stmt.where(Transaction.transaction_date >= date_from)
 
         if date_to is not None:
-            base_stmt = base_stmt.where(Transaction.transaction_date <= date_to)
-            count_stmt = count_stmt.where(Transaction.transaction_date <= date_to)
+            base_stmt = base_stmt.where(Transaction.transaction_date < date_to)
+            count_stmt = count_stmt.where(Transaction.transaction_date < date_to)
 
         if tx_type is not None:
             base_stmt = base_stmt.where(Transaction.type == tx_type)

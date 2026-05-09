@@ -16,6 +16,7 @@ import { Route as dashboardDashboardTransactionsRouteImport } from './app/router
 import { Route as dashboardDashboardDashboardRouteImport } from './app/router/(dashboard)/_dashboard.dashboard'
 import { Route as dashboardDashboardCategoriesRouteImport } from './app/router/(dashboard)/_dashboard.categories'
 import { Route as dashboardDashboardBudgetsRouteImport } from './app/router/(dashboard)/_dashboard.budgets'
+import { Route as dashboardDashboardAnalyticsRouteImport } from './app/router/(dashboard)/_dashboard.analytics'
 import { Route as authAuthRegisterRouteImport } from './app/router/(auth)/_auth.register'
 import { Route as authAuthLoginRouteImport } from './app/router/(auth)/_auth.login'
 
@@ -56,6 +57,12 @@ const dashboardDashboardBudgetsRoute =
     path: '/budgets',
     getParentRoute: () => dashboardDashboardRoute,
   } as any)
+const dashboardDashboardAnalyticsRoute =
+  dashboardDashboardAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => dashboardDashboardRoute,
+  } as any)
 const authAuthRegisterRoute = authAuthRegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
+  '/analytics': typeof dashboardDashboardAnalyticsRoute
   '/budgets': typeof dashboardDashboardBudgetsRoute
   '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof authAuthLoginRoute
   '/register': typeof authAuthRegisterRoute
+  '/analytics': typeof dashboardDashboardAnalyticsRoute
   '/budgets': typeof dashboardDashboardBudgetsRoute
   '/categories': typeof dashboardDashboardCategoriesRoute
   '/dashboard': typeof dashboardDashboardDashboardRoute
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/(dashboard)/_dashboard': typeof dashboardDashboardRouteWithChildren
   '/(auth)/_auth/login': typeof authAuthLoginRoute
   '/(auth)/_auth/register': typeof authAuthRegisterRoute
+  '/(dashboard)/_dashboard/analytics': typeof dashboardDashboardAnalyticsRoute
   '/(dashboard)/_dashboard/budgets': typeof dashboardDashboardBudgetsRoute
   '/(dashboard)/_dashboard/categories': typeof dashboardDashboardCategoriesRoute
   '/(dashboard)/_dashboard/dashboard': typeof dashboardDashboardDashboardRoute
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/analytics'
     | '/budgets'
     | '/categories'
     | '/dashboard'
@@ -112,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/analytics'
     | '/budgets'
     | '/categories'
     | '/dashboard'
@@ -123,6 +135,7 @@ export interface FileRouteTypes {
     | '/(dashboard)/_dashboard'
     | '/(auth)/_auth/login'
     | '/(auth)/_auth/register'
+    | '/(dashboard)/_dashboard/analytics'
     | '/(dashboard)/_dashboard/budgets'
     | '/(dashboard)/_dashboard/categories'
     | '/(dashboard)/_dashboard/dashboard'
@@ -186,6 +199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof dashboardDashboardBudgetsRouteImport
       parentRoute: typeof dashboardDashboardRoute
     }
+    '/(dashboard)/_dashboard/analytics': {
+      id: '/(dashboard)/_dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof dashboardDashboardAnalyticsRouteImport
+      parentRoute: typeof dashboardDashboardRoute
+    }
     '/(auth)/_auth/register': {
       id: '/(auth)/_auth/register'
       path: '/register'
@@ -218,6 +238,7 @@ const authAuthRouteWithChildren = authAuthRoute._addFileChildren(
 )
 
 interface dashboardDashboardRouteChildren {
+  dashboardDashboardAnalyticsRoute: typeof dashboardDashboardAnalyticsRoute
   dashboardDashboardBudgetsRoute: typeof dashboardDashboardBudgetsRoute
   dashboardDashboardCategoriesRoute: typeof dashboardDashboardCategoriesRoute
   dashboardDashboardDashboardRoute: typeof dashboardDashboardDashboardRoute
@@ -225,6 +246,7 @@ interface dashboardDashboardRouteChildren {
 }
 
 const dashboardDashboardRouteChildren: dashboardDashboardRouteChildren = {
+  dashboardDashboardAnalyticsRoute: dashboardDashboardAnalyticsRoute,
   dashboardDashboardBudgetsRoute: dashboardDashboardBudgetsRoute,
   dashboardDashboardCategoriesRoute: dashboardDashboardCategoriesRoute,
   dashboardDashboardDashboardRoute: dashboardDashboardDashboardRoute,

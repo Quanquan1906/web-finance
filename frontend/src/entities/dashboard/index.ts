@@ -5,8 +5,7 @@ export type {
   DashboardOverview,
   DashboardSummary,
   DashboardFilters,
-  DashboardPreset,
+  DashboardPeriod,
   ExpenseByCategoryItem,
-  BudgetProgressItem,
   DashboardRecentTransaction,
 } from './model/types';
