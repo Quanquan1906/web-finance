@@ -5,6 +5,7 @@ import unicodedata
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.models.category import Category
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -19,6 +20,17 @@ class AssistantService:
     def chat(self, current_user: User, message: str) -> dict:
         normalized = self._normalize(message)
         date_from, date_to, period_label = self._detect_period(normalized)
+        gemini_response = self._gemini_reply(
+            current_user=current_user,
+            message=message,
+            normalized_message=normalized,
+            date_from=date_from,
+            date_to=date_to,
+            period_label=period_label,
+        )
+
+        if gemini_response is not None:
+            return gemini_response
 
         if self._is_recent_transactions_question(normalized):
             return self._recent_transactions_reply(current_user, date_from, date_to, period_label)
@@ -40,6 +52,139 @@ class AssistantService:
             "intent": "help",
             "suggestions": self._default_suggestions(),
         }
+
+    def _gemini_reply(
+        self,
+        current_user: User,
+        message: str,
+        normalized_message: str,
+        date_from: date | None,
+        date_to: date | None,
+        period_label: str,
+    ) -> dict | None:
+        if settings.ai_provider.lower() != "gemini" or not settings.gemini_api_key:
+            return None
+
+        try:
+            from app.services.gemini_service import GeminiService
+
+            finance_context = self._build_finance_context(
+                current_user=current_user,
+                date_from=date_from,
+                date_to=date_to,
+                period_label=period_label,
+            )
+            reply = GeminiService().generate_finance_reply(
+                user_message=message,
+                finance_context=finance_context,
+            )
+        except Exception:
+            return None
+
+        return {
+            "reply": reply,
+            "intent": self._detect_intent(normalized_message),
+            "suggestions": self._default_suggestions(),
+        }
+
+    def _build_finance_context(
+        self,
+        current_user: User,
+        date_from: date | None,
+        date_to: date | None,
+        period_label: str,
+    ) -> str:
+        summary = self.report_repo.get_summary(
+            current_user.id,
+            date_from=date_from,
+            date_to=date_to,
+        )
+        expense_rows = self.report_repo.get_total_by_category(
+            current_user.id,
+            tx_type="expense",
+            date_from=date_from,
+            date_to=date_to,
+        )
+        income_rows = self.report_repo.get_total_by_category(
+            current_user.id,
+            tx_type="income",
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        expense_lines = self._format_category_context(expense_rows)
+        income_lines = self._format_category_context(income_rows)
+        recent_lines = self._recent_transactions_context(
+            current_user=current_user,
+            date_from=date_from,
+            date_to=date_to,
+        )
+
+        return f"""
+Kỳ dữ liệu: {period_label}
+Từ ngày: {date_from or "không giới hạn"}
+Đến ngày: {date_to or "không giới hạn"}
+Tổng thu: {self._format_money(summary["total_income"])}
+Tổng chi: {self._format_money(summary["total_expense"])}
+Số dư: {self._format_money(summary["balance"])}
+
+Thu nhập theo danh mục:
+{income_lines}
+
+Chi tiêu theo danh mục:
+{expense_lines}
+
+Giao dịch gần đây:
+{recent_lines}
+""".strip()
+
+    def _format_category_context(self, rows) -> str:
+        if not rows:
+            return "Chưa có dữ liệu."
+
+        return "\n".join(
+            f"- {row.name}: {self._format_money(row.total)}"
+            for row in rows[:10]
+        )
+
+    def _recent_transactions_context(
+        self,
+        current_user: User,
+        date_from: date | None,
+        date_to: date | None,
+    ) -> str:
+        stmt = (
+            select(Transaction, Category.name.label("category_name"))
+            .join(Category, Category.id == Transaction.category_id)
+            .where(Transaction.user_id == current_user.id)
+        )
+
+        if date_from is not None:
+            stmt = stmt.where(Transaction.transaction_date >= date_from)
+
+        if date_to is not None:
+            stmt = stmt.where(Transaction.transaction_date <= date_to)
+
+        stmt = stmt.order_by(
+            Transaction.transaction_date.desc(),
+            Transaction.created_at.desc(),
+        ).limit(5)
+        rows = self.db.execute(stmt).all()
+
+        if not rows:
+            return "Chưa có giao dịch."
+
+        lines = []
+        for transaction, category_name in rows:
+            sign = "+" if transaction.type == "income" else "-"
+            note = f" - {transaction.note}" if transaction.note else ""
+            lines.append(
+                f"- {transaction.transaction_date.strftime('%d/%m/%Y')}: "
+                f"{sign}{self._format_money(transaction.amount)} "
+                f"({category_name}){note}"
+            )
+
+        return "\n".join(lines)
 
     def _summary_reply(
         self,
@@ -242,6 +387,21 @@ class AssistantService:
             "tong chi",
         ]
         return any(keyword in normalized_message for keyword in keywords)
+
+    def _detect_intent(self, normalized_message: str) -> str:
+        if self._is_recent_transactions_question(normalized_message):
+            return "recent_transactions"
+
+        if self._is_category_question(normalized_message):
+            return "expense_by_category"
+
+        if self._is_saving_question(normalized_message):
+            return "saving_advice"
+
+        if self._is_summary_question(normalized_message):
+            return "summary"
+
+        return "help"
 
     def _is_category_question(self, normalized_message: str) -> bool:
         keywords = [
