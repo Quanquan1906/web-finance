@@ -1,6 +1,7 @@
 import { Separator } from "@/shared/ui/separator";
 import { SidebarProvider, SidebarTrigger } from "@/shared/ui/sidebar";
 import { AppSidebar } from "@/widgets/app-shell/ui/AppSidebar";
+import { AssistantChatWidget } from "@/widgets/assistant-chat";
 import { useRouterState } from "@tanstack/react-router";
 
 const routeLabels: Record<string, string> = {
@@ -35,6 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
           {/* Page content */}
           <div className="flex-1 overflow-auto p-5 md:p-6">{children}</div>
+          <AssistantChatWidget />
         </main>
       </div>
     </SidebarProvider>
