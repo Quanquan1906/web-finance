@@ -28,8 +28,8 @@ class ReportRepository:
             expense_stmt = expense_stmt.where(Transaction.transaction_date >= date_from)
 
         if date_to is not None:
-            income_stmt = income_stmt.where(Transaction.transaction_date < date_to)
-            expense_stmt = expense_stmt.where(Transaction.transaction_date < date_to)
+            income_stmt = income_stmt.where(Transaction.transaction_date <= date_to)
+            expense_stmt = expense_stmt.where(Transaction.transaction_date <= date_to)
 
         total_income = self.db.scalar(income_stmt) or Decimal("0")
         total_expense = self.db.scalar(expense_stmt) or Decimal("0")
@@ -63,7 +63,7 @@ class ReportRepository:
             stmt = stmt.where(Transaction.transaction_date >= date_from)
 
         if date_to is not None:
-            stmt = stmt.where(Transaction.transaction_date < date_to)
+            stmt = stmt.where(Transaction.transaction_date <= date_to)
 
         stmt = stmt.group_by(Category.id, Category.name).order_by(
             func.sum(Transaction.amount).desc()

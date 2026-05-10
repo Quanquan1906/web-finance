@@ -17,7 +17,7 @@ const initialAssistantMessage: AssistantMessage = {
   id: 'welcome',
   role: 'assistant',
   content:
-    'Xin chào, mình là trợ lý tài chính. Bạn có thể hỏi về tổng thu chi, danh mục chi tiêu hoặc giao dịch gần đây.',
+    'Xin chào, mình là trợ lý tài adasdchính. Bạn có thể hỏi về tổng thu chi, danh mục chi tiêu hoặc giao dịch gần đây.',
 };
 
 function createMessageId() {

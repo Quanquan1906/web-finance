@@ -42,7 +42,9 @@ export function AssistantPage() {
   const [messages, setMessages] = useState<AssistantMessage[]>([initialAssistantMessage]);
   const [suggestions, setSuggestions] = useState(DEFAULT_SUGGESTIONS);
   const bottomRef = useRef<HTMLDivElement | null>(null);
-  const { error: speechError, isListening, isSupported, startListening, stopListening } = useSpeechRecognition();
+
+  const { error: speechError, isListening, isSupported, startListening, stopListening } =
+    useSpeechRecognition();
 
   const chatMutation = useMutation({
     mutationFn: assistantApi.sendMessage,
@@ -78,6 +80,7 @@ export function AssistantPage() {
               content: data.reply,
             },
           ]);
+
           setSuggestions(data.suggestions.length > 0 ? data.suggestions : DEFAULT_SUGGESTIONS);
         },
         onError: () => {
@@ -124,32 +127,47 @@ export function AssistantPage() {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-6.5rem)] w-full max-w-5xl flex-col overflow-hidden">
-      <div className="mb-4 flex shrink-0 items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-950">AI Trợ lý tài chính</h1>
-          <p className="text-sm text-muted-foreground">
+    <div className="mx-auto flex h-[calc(100vh-6.5rem)] w-full max-w-full flex-col overflow-hidden px-4 py-5 lg:px-6">
+      <div className="mb-5 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+            AI Trợ lý tài chính
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
             Hỏi nhanh về thu chi, danh mục và giao dịch từ dữ liệu của bạn.
           </p>
         </div>
-        <Button type="button" variant="outline" onClick={handleReset}>
+
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleReset}
+          className="w-fit rounded-xl bg-white shadow-sm"
+        >
           <RotateCcw className="size-4" />
           Làm mới
         </Button>
       </div>
 
-      <section className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-sm lg:grid-cols-[280px_minmax(0,1fr)]">
-        <aside className="hidden border-r border-emerald-100 bg-emerald-50/60 p-5 lg:block">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
+      <section className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm lg:grid-cols-[300px_minmax(0,1fr)]">
+        <aside className="hidden border-r border-slate-200 bg-gradient-to-b from-emerald-50 via-white to-white p-6 lg:block">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md shadow-emerald-900/10">
             <Bot className="size-6" />
           </div>
-          <h2 className="mt-4 text-lg font-semibold text-slate-950">Bạn có thể hỏi</h2>
-          <div className="mt-4 space-y-2">
-            {DEFAULT_SUGGESTIONS.map((suggestion) => (
+
+          <div className="mt-5">
+            <h2 className="text-lg font-semibold text-slate-950">Bạn có thể hỏi</h2>
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Chọn nhanh một câu hỏi mẫu hoặc nhập câu hỏi của bạn ở khung chat.
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-2.5">
+            {suggestions.map((suggestion) => (
               <button
                 key={suggestion}
                 type="button"
-                className="w-full rounded-xl border border-emerald-100 bg-white px-3 py-2 text-left text-sm font-medium text-emerald-800 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-50 disabled:opacity-60"
+                className="w-full rounded-2xl border border-emerald-100 bg-white px-4 py-3 text-left text-sm font-medium text-emerald-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-50 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={chatMutation.isPending}
                 onClick={() => submitMessage(suggestion)}
               >
@@ -159,28 +177,31 @@ export function AssistantPage() {
           </div>
         </aside>
 
-        <div className="flex min-h-0 flex-col bg-slate-50/80">
-          <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white px-4 py-3">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+        <div className="flex min-h-0 flex-col bg-slate-50/70">
+          <div className="flex shrink-0 items-center gap-3 border-b border-slate-200 bg-white/95 px-5 py-4">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
               <Sparkles className="size-5" />
             </div>
-            <div>
+
+            <div className="min-w-0">
               <h2 className="text-sm font-semibold text-slate-950">Cuộc trò chuyện</h2>
-              <p className="text-xs text-muted-foreground">Dữ liệu được lấy từ giao dịch trong tài khoản hiện tại.</p>
+              <p className="truncate text-xs text-muted-foreground">
+                Dữ liệu được lấy từ giao dịch trong tài khoản hiện tại.
+              </p>
             </div>
           </div>
 
-          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
+          <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-5">
             {messages.map((message) => {
               const isUser = message.role === 'user';
 
               return (
                 <div key={message.id} className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
                   <div
-                    className={`max-w-[78%] rounded-2xl px-4 py-2.5 text-sm leading-6 shadow-sm ${
+                    className={`max-w-[82%] break-words rounded-3xl px-4 py-3 text-sm leading-6 shadow-sm md:max-w-[72%] ${
                       isUser
-                        ? 'rounded-br-md bg-emerald-600 text-white'
-                        : 'rounded-bl-md border border-slate-200 bg-white text-slate-800'
+                        ? 'rounded-br-lg bg-emerald-600 text-white shadow-emerald-900/10'
+                        : 'rounded-bl-lg border border-slate-200 bg-white text-slate-800'
                     }`}
                   >
                     {renderMessageContent(message.content)}
@@ -191,22 +212,23 @@ export function AssistantPage() {
 
             {chatMutation.isPending ? (
               <div className="flex justify-start">
-                <div className="flex items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 shadow-sm">
+                <div className="flex items-center gap-2 rounded-3xl rounded-bl-lg border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 shadow-sm">
                   <Loader2 className="size-4 animate-spin text-emerald-600" />
                   Đang phân tích dữ liệu...
                 </div>
               </div>
             ) : null}
+
             <div ref={bottomRef} />
           </div>
 
-          <div className="shrink-0 border-t border-slate-200 bg-white p-4">
+          <div className="shrink-0 border-t border-slate-200 bg-white/95 p-4">
             <div className="mb-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
               {suggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"
-                  className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-60"
+                  className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={chatMutation.isPending}
                   onClick={() => submitMessage(suggestion)}
                 >
@@ -217,7 +239,7 @@ export function AssistantPage() {
 
             {speechError ? <p className="mb-2 text-xs text-red-600">{speechError}</p> : null}
 
-            <form className="flex items-end gap-2" onSubmit={handleSubmit}>
+            <form className="flex items-end gap-2 sm:gap-3" onSubmit={handleSubmit}>
               <Textarea
                 value={inputValue}
                 onChange={(event) => setInputValue(event.target.value)}
@@ -228,14 +250,15 @@ export function AssistantPage() {
                   }
                 }}
                 placeholder="Ví dụ: Tháng này tôi chi bao nhiêu?"
-                className="max-h-28 min-h-12 resize-none rounded-xl bg-slate-50 text-sm"
+                className="max-h-28 min-h-12 resize-none rounded-2xl border-slate-200 bg-slate-50 px-4 py-3 text-sm shadow-inner focus-visible:ring-emerald-500"
                 disabled={chatMutation.isPending}
               />
+
               <Button
                 type="button"
                 variant="outline"
                 size="icon-lg"
-                className={`shrink-0 rounded-xl ${
+                className={`shrink-0 rounded-2xl bg-white shadow-sm ${
                   isListening ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100' : ''
                 }`}
                 disabled={!isSupported || chatMutation.isPending}
@@ -245,10 +268,11 @@ export function AssistantPage() {
               >
                 {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
               </Button>
+
               <Button
                 type="submit"
                 size="icon-lg"
-                className="shrink-0 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
+                className="shrink-0 rounded-2xl bg-emerald-600 text-white shadow-sm shadow-emerald-900/10 hover:bg-emerald-700"
                 disabled={!inputValue.trim() || chatMutation.isPending}
                 aria-label="Gửi câu hỏi"
               >

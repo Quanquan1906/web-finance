@@ -1,21 +1,22 @@
+import calendar
+import re
 from datetime import date, timedelta
 from decimal import Decimal
 import unicodedata
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.category import Category
-from app.models.transaction import Transaction
 from app.models.user import User
 from app.repositories.report_repository import ReportRepository
+from app.repositories.transaction_repository import TransactionRepository
 
 
 class AssistantService:
     def __init__(self, db: Session):
         self.db = db
         self.report_repo = ReportRepository(db)
+        self.transaction_repo = TransactionRepository(db)
 
     def chat(self, current_user: User, message: str) -> dict:
         normalized = self._normalize(message)
@@ -62,9 +63,12 @@ class AssistantService:
         date_to: date | None,
         period_label: str,
     ) -> dict | None:
+        print("AI provider:", settings.ai_provider)
+        print("Has Gemini key:", bool(settings.gemini_api_key))
         if settings.ai_provider.lower() != "gemini" or not settings.gemini_api_key:
+            print("Gemini skipped: using local fallback")
             return None
-
+        print("Gemini enabled: calling Gemini API")
         try:
             from app.services.gemini_service import GeminiService
 
@@ -153,23 +157,12 @@ Giao dịch gần đây:
         date_from: date | None,
         date_to: date | None,
     ) -> str:
-        stmt = (
-            select(Transaction, Category.name.label("category_name"))
-            .join(Category, Category.id == Transaction.category_id)
-            .where(Transaction.user_id == current_user.id)
+        rows = self.transaction_repo.get_recent_with_category(
+            user_id=current_user.id,
+            date_from=date_from,
+            date_to=date_to,
+            limit=5,
         )
-
-        if date_from is not None:
-            stmt = stmt.where(Transaction.transaction_date >= date_from)
-
-        if date_to is not None:
-            stmt = stmt.where(Transaction.transaction_date <= date_to)
-
-        stmt = stmt.order_by(
-            Transaction.transaction_date.desc(),
-            Transaction.created_at.desc(),
-        ).limit(5)
-        rows = self.db.execute(stmt).all()
 
         if not rows:
             return "Chưa có giao dịch."
@@ -262,20 +255,12 @@ Giao dịch gần đây:
         date_to: date | None,
         period_label: str,
     ) -> dict:
-        stmt = (
-            select(Transaction, Category.name.label("category_name"))
-            .join(Category, Category.id == Transaction.category_id)
-            .where(Transaction.user_id == current_user.id)
+        rows = self.transaction_repo.get_recent_with_category(
+            user_id=current_user.id,
+            date_from=date_from,
+            date_to=date_to,
+            limit=5,
         )
-
-        if date_from is not None:
-            stmt = stmt.where(Transaction.transaction_date >= date_from)
-
-        if date_to is not None:
-            stmt = stmt.where(Transaction.transaction_date <= date_to)
-
-        stmt = stmt.order_by(Transaction.transaction_date.desc(), Transaction.created_at.desc()).limit(5)
-        rows = self.db.execute(stmt).all()
 
         if not rows:
             return {
@@ -357,24 +342,92 @@ Giao dịch gần đây:
             ],
         }
 
-    def _detect_period(self, normalized_message: str) -> tuple[date | None, date | None, str]:
-        today = date.today()
+    def _detect_period(
+        self,
+        normalized_message: str,
+        _today: date | None = None,
+    ) -> tuple[date | None, date | None, str]:
+        today = _today or date.today()
 
+        # 1. Tất cả dữ liệu — không lọc ngày
+        if "tat ca" in normalized_message or "toan bo" in normalized_message:
+            return None, None, "Tất cả dữ liệu"
+
+        # 2. Hôm nay
         if "hom nay" in normalized_message:
             return today, today, "Hôm nay"
 
+        # 3. Tuần này
         if "tuan" in normalized_message:
             start = today - timedelta(days=today.weekday())
             return start, today, "Tuần này"
 
+        # 4. Tháng cụ thể: "tháng 6", "tháng 6/2026", "tháng 6 năm 2026"
+        # Phải kiểm tra TRƯỚC "năm" để tránh "tháng 6 năm 2026" bị parse thành cả năm
+        month_match = re.search(
+            r"thang\s+(\d{1,2})(?:\s*(?:/\s*|nam\s+)(\d{4}))?",
+            normalized_message,
+        )
+        if month_match:
+            month = int(month_match.group(1))
+            year_str = month_match.group(2)
+            year = int(year_str) if year_str else today.year
+            if 1 <= month <= 12:
+                _, last_day = calendar.monthrange(year, month)
+                return (
+                    date(year, month, 1),
+                    date(year, month, last_day),
+                    f"Tháng {month}/{year}",
+                )
+            # Tháng không hợp lệ (0 hoặc 13+): fallback tháng hiện tại
+            _, last_day = calendar.monthrange(today.year, today.month)
+            return (
+                date(today.year, today.month, 1),
+                date(today.year, today.month, last_day),
+                f"Tháng {today.month}/{today.year}",
+            )
+
+        # 5. Tháng trước
+        if "thang truoc" in normalized_message:
+            first_this_month = date(today.year, today.month, 1)
+            last_month_last = first_this_month - timedelta(days=1)
+            last_month_first = date(last_month_last.year, last_month_last.month, 1)
+            return (
+                last_month_first,
+                last_month_last,
+                f"Tháng {last_month_last.month}/{last_month_last.year}",
+            )
+
+        # 6. Tháng này (hoặc bất kỳ "tháng" nào không khớp ở trên)
+        if "thang" in normalized_message:
+            _, last_day = calendar.monthrange(today.year, today.month)
+            return (
+                date(today.year, today.month, 1),
+                date(today.year, today.month, last_day),
+                f"Tháng {today.month}/{today.year}",
+            )
+
+        # 7. Năm cụ thể: "năm 2026"
+        year_match = re.search(r"\bnam\s+(\d{4})\b", normalized_message)
+        if year_match:
+            year = int(year_match.group(1))
+            return date(year, 1, 1), date(year, 12, 31), f"Năm {year}"
+
+        # 8. Năm nay (hoặc bất kỳ "năm" nào không khớp ở trên)
         if "nam" in normalized_message:
-            return date(today.year, 1, 1), today, "Năm nay"
+            return (
+                date(today.year, 1, 1),
+                date(today.year, 12, 31),
+                f"Năm {today.year}",
+            )
 
-        if "tat ca" in normalized_message or "toan bo" in normalized_message:
-            return None, None, "Tất cả dữ liệu"
-
-        start = date(today.year, today.month, 1)
-        return start, today, "Tháng này"
+        # 9. Fallback: tháng hiện tại
+        _, last_day = calendar.monthrange(today.year, today.month)
+        return (
+            date(today.year, today.month, 1),
+            date(today.year, today.month, last_day),
+            f"Tháng {today.month}/{today.year}",
+        )
 
     def _is_summary_question(self, normalized_message: str) -> bool:
         keywords = [
