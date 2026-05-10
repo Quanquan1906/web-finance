@@ -5,6 +5,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.models.category import Category
 from app.models.transaction import Transaction
 
 
@@ -35,8 +36,8 @@ class TransactionRepository:
             count_stmt = count_stmt.where(Transaction.transaction_date >= date_from)
 
         if date_to is not None:
-            base_stmt = base_stmt.where(Transaction.transaction_date < date_to)
-            count_stmt = count_stmt.where(Transaction.transaction_date < date_to)
+            base_stmt = base_stmt.where(Transaction.transaction_date <= date_to)
+            count_stmt = count_stmt.where(Transaction.transaction_date <= date_to)
 
         if tx_type is not None:
             base_stmt = base_stmt.where(Transaction.type == tx_type)
@@ -103,3 +104,30 @@ class TransactionRepository:
 
     def delete(self, transaction: Transaction) -> None:
         self.db.delete(transaction)
+
+    def get_recent_with_category(
+        self,
+        user_id: UUID,
+        date_from: date | None = None,
+        date_to: date | None = None,
+        limit: int = 5,
+    ) -> list:
+        """Return recent transactions joined with category name, ordered by date desc."""
+        stmt = (
+            select(Transaction, Category.name.label("category_name"))
+            .join(Category, Category.id == Transaction.category_id)
+            .where(Transaction.user_id == user_id)
+        )
+
+        if date_from is not None:
+            stmt = stmt.where(Transaction.transaction_date >= date_from)
+
+        if date_to is not None:
+            stmt = stmt.where(Transaction.transaction_date <= date_to)
+
+        stmt = stmt.order_by(
+            Transaction.transaction_date.desc(),
+            Transaction.created_at.desc(),
+        ).limit(limit)
+
+        return self.db.execute(stmt).all()

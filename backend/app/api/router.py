@@ -14,6 +14,8 @@ from app.api.v1.budgets import router as budgets_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.statistics import router as statistics_router
 from app.api.v1.assistant import router as assistant_router
+from app.api.v1.quick_transactions import router as quick_transactions_router
+from app.api.v1.receipt_ocr import router as receipt_ocr_router
 
 api_router = APIRouter()
 
@@ -42,3 +44,5 @@ api_router.include_router(dashboard_router)
 
 api_router.include_router(statistics_router)
 api_router.include_router(assistant_router)
+api_router.include_router(quick_transactions_router)
+api_router.include_router(receipt_ocr_router)

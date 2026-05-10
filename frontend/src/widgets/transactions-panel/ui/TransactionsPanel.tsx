@@ -5,6 +5,8 @@ import { useTransactionsQuery, type Transaction } from '@/entities/transaction';
 import { CreateTransactionDialog } from '@/features/transaction/create-transaction';
 import { DeleteTransactionDialog } from '@/features/transaction/delete-transaction';
 import { EditTransactionDialog } from '@/features/transaction/edit-transaction';
+import { QuickCreateTransactionDialog } from '@/features/transaction/quick-create-transaction';
+import { buildTransactionDateRange } from '../model/build-transaction-date-range';
 import { useTransactionTableState } from '../model/use-transaction-table-state';
 import { TransactionsActions } from './TransactionsActions';
 import { TransactionsTable } from './TransactionsTable';
@@ -13,8 +15,6 @@ import { TransactionsToolbar } from './TransactionsToolbar';
 type CategoryLite = {
   id: string;
   name: string;
-  icon?: string;
-  color?: string;
 };
 
 export function TransactionsPanel() {
@@ -23,8 +23,18 @@ export function TransactionsPanel() {
     setSearch,
     categoryFilter,
     setCategoryFilter,
+    dateMode,
+    setDateMode,
+    selectedDate,
+    setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
+    selectedYear,
+    setSelectedYear,
     createOpen,
     setCreateOpen,
+    nlpOpen,
+    setNlpOpen,
     editOpen,
     deleteOpen,
     selectedTransaction,
@@ -34,7 +44,9 @@ export function TransactionsPanel() {
     closeDelete,
   } = useTransactionTableState();
 
-  const { data: transactionsData, isLoading, isError } = useTransactionsQuery();
+  const dateRange = buildTransactionDateRange(dateMode, selectedDate, selectedMonth, selectedYear);
+
+  const { data: transactionsData, isLoading, isError } = useTransactionsQuery(dateRange);
   const { data: categoriesData } = useCategoriesQuery();
 
   const transactions = transactionsData?.items ?? [];
@@ -83,9 +95,7 @@ export function TransactionsPanel() {
     <div className="space-y-3">
       <TransactionsActions
         onOpenCreate={() => setCreateOpen(true)}
-        onOpenNlp={() => {
-          console.log('open nlp');
-        }}
+        onOpenNlp={() => setNlpOpen(true)}
       />
 
       <TransactionsToolbar
@@ -94,6 +104,14 @@ export function TransactionsPanel() {
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
         categories={categories}
+        dateMode={dateMode}
+        onDateModeChange={setDateMode}
+        selectedDate={selectedDate}
+        onSelectedDateChange={setSelectedDate}
+        selectedMonth={selectedMonth}
+        onSelectedMonthChange={setSelectedMonth}
+        selectedYear={selectedYear}
+        onSelectedYearChange={setSelectedYear}
       />
 
       <TransactionsTable
@@ -104,6 +122,7 @@ export function TransactionsPanel() {
       />
 
       <CreateTransactionDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <QuickCreateTransactionDialog open={nlpOpen} onOpenChange={setNlpOpen} />
       <EditTransactionDialog open={editOpen} onOpenChange={closeEdit} transaction={selectedTransaction} />
       <DeleteTransactionDialog open={deleteOpen} onOpenChange={closeDelete} transaction={selectedTransaction} />
     </div>
