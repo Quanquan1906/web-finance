@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import date
 from typing import Optional
 from uuid import UUID
 
@@ -113,3 +114,60 @@ class StatisticsService:
             difference=difference,
             category_comparison=category_comparison,
         )
+
+    # ------------------------------------------------------------------
+    # Methods for Dashboard (exclusive end_date from build_period_range)
+    # ------------------------------------------------------------------
+
+    def get_period_summary(
+        self, user_id: UUID, start_date: date, end_date: date
+    ) -> dict:
+        """Exclusive end_date. Returns {total_income, total_expense, period_balance}."""
+        return self.repo.get_period_summary(user_id, start_date, end_date)
+
+    def get_expense_by_category_for_period(
+        self, user_id: UUID, start_date: date, end_date: date
+    ) -> list[dict]:
+        """Exclusive end_date. Returns [{category_id, category_name, total}]."""
+        rows = self.repo.get_expense_by_category(user_id, start_date, end_date)
+        return self._map_category_rows(rows)
+
+    # ------------------------------------------------------------------
+    # Methods for AssistantService (inclusive optional date_from/date_to)
+    # ------------------------------------------------------------------
+
+    def get_summary(
+        self,
+        user_id: UUID,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ) -> dict:
+        """Inclusive optional dates. Returns {total_income, total_expense, balance}."""
+        return self.repo.get_summary(user_id, date_from=date_from, date_to=date_to)
+
+    def get_total_by_category(
+        self,
+        user_id: UUID,
+        tx_type: str,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ):
+        """Inclusive optional dates. Returns raw rows with .name and .total attributes."""
+        return self.repo.get_total_by_category(
+            user_id, tx_type, date_from=date_from, date_to=date_to
+        )
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _map_category_rows(rows) -> list[dict]:
+        return [
+            {
+                "category_id": str(row.id),
+                "category_name": row.name,
+                "total": row.total,
+            }
+            for row in rows
+        ]

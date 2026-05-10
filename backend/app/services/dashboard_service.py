@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.dashboard import DashboardOverviewResponse, DashboardSummaryResponse
 from app.services.budget_service import BudgetService
-from app.services.report_service import ReportService
+from app.services.statistics_service import StatisticsService
 from app.services.transaction_service import TransactionService
 from app.core.date_range import build_period_range
 
@@ -15,7 +15,7 @@ from app.core.date_range import build_period_range
 class DashboardService:
     def __init__(self, db: Session):
         self.db = db
-        self.report_service = ReportService(db)
+        self.statistics_service = StatisticsService(db)
         self.budget_service = BudgetService(db)
         self.transaction_service = TransactionService(db)
 
@@ -35,10 +35,10 @@ class DashboardService:
         )
 
         # 1) Period income / expense
-        period_data = self.report_service.get_summary(
-            current_user=current_user,
-            date_from=start_date,
-            date_to=end_date,
+        period_data = self.statistics_service.get_period_summary(
+            user_id=current_user.id,
+            start_date=start_date,
+            end_date=end_date,
         )
         total_income = period_data["total_income"]
         total_expense = period_data["total_expense"]
@@ -50,10 +50,10 @@ class DashboardService:
         )
 
         # 2) Expense by category in period
-        expense_by_category = self.report_service.get_expense_by_category(
-            current_user=current_user,
-            date_from=start_date,
-            date_to=end_date,
+        expense_by_category = self.statistics_service.get_expense_by_category_for_period(
+            user_id=current_user.id,
+            start_date=start_date,
+            end_date=end_date,
         )
 
         # 3) Budget progress — only relevant for month view

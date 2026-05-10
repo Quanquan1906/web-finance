@@ -8,14 +8,14 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.user import User
-from app.repositories.report_repository import ReportRepository
+from app.services.statistics_service import StatisticsService
 from app.repositories.transaction_repository import TransactionRepository
 
 
 class AssistantService:
     def __init__(self, db: Session):
         self.db = db
-        self.report_repo = ReportRepository(db)
+        self.statistics_service = StatisticsService(db)
         self.transaction_repo = TransactionRepository(db)
 
     def chat(self, current_user: User, message: str) -> dict:
@@ -98,18 +98,18 @@ class AssistantService:
         date_to: date | None,
         period_label: str,
     ) -> str:
-        summary = self.report_repo.get_summary(
+        summary = self.statistics_service.get_summary(
             current_user.id,
             date_from=date_from,
             date_to=date_to,
         )
-        expense_rows = self.report_repo.get_total_by_category(
+        expense_rows = self.statistics_service.get_total_by_category(
             current_user.id,
             tx_type="expense",
             date_from=date_from,
             date_to=date_to,
         )
-        income_rows = self.report_repo.get_total_by_category(
+        income_rows = self.statistics_service.get_total_by_category(
             current_user.id,
             tx_type="income",
             date_from=date_from,
@@ -186,7 +186,7 @@ Giao dịch gần đây:
         date_to: date | None,
         period_label: str,
     ) -> dict:
-        summary = self.report_repo.get_summary(
+        summary = self.statistics_service.get_summary(
             current_user.id,
             date_from=date_from,
             date_to=date_to,
@@ -217,7 +217,7 @@ Giao dịch gần đây:
         date_to: date | None,
         period_label: str,
     ) -> dict:
-        rows = self.report_repo.get_total_by_category(
+        rows = self.statistics_service.get_total_by_category(
             current_user.id,
             tx_type="expense",
             date_from=date_from,
@@ -296,12 +296,12 @@ Giao dịch gần đây:
         date_to: date | None,
         period_label: str,
     ) -> dict:
-        summary = self.report_repo.get_summary(
+        summary = self.statistics_service.get_summary(
             current_user.id,
             date_from=date_from,
             date_to=date_to,
         )
-        rows = self.report_repo.get_total_by_category(
+        rows = self.statistics_service.get_total_by_category(
             current_user.id,
             tx_type="expense",
             date_from=date_from,

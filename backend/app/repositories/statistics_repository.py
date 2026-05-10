@@ -66,3 +66,77 @@ class StatisticsRepository:
             .order_by(func.sum(Transaction.amount).desc())
         )
         return self.db.execute(stmt).all()
+
+    def get_summary(
+        self,
+        user_id: UUID,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ) -> dict:
+        """Inclusive optional date_from / date_to. Used by AssistantService.
+        Returns {total_income, total_expense, balance}.
+        """
+        income_stmt = select(
+            func.coalesce(func.sum(Transaction.amount), 0)
+        ).where(
+            Transaction.user_id == user_id,
+            Transaction.type == "income",
+        )
+        expense_stmt = select(
+            func.coalesce(func.sum(Transaction.amount), 0)
+        ).where(
+            Transaction.user_id == user_id,
+            Transaction.type == "expense",
+        )
+
+        if date_from is not None:
+            income_stmt = income_stmt.where(Transaction.transaction_date >= date_from)
+            expense_stmt = expense_stmt.where(Transaction.transaction_date >= date_from)
+
+        if date_to is not None:
+            income_stmt = income_stmt.where(Transaction.transaction_date <= date_to)
+            expense_stmt = expense_stmt.where(Transaction.transaction_date <= date_to)
+
+        total_income: Decimal = self.db.scalar(income_stmt) or Decimal("0")
+        total_expense: Decimal = self.db.scalar(expense_stmt) or Decimal("0")
+
+        return {
+            "total_income": total_income,
+            "total_expense": total_expense,
+            "balance": total_income - total_expense,
+        }
+
+    def get_total_by_category(
+        self,
+        user_id: UUID,
+        tx_type: str,
+        date_from: date | None = None,
+        date_to: date | None = None,
+    ):
+        """Inclusive optional date_from / date_to. Used by AssistantService.
+        Returns raw SQLAlchemy rows with .id, .name, .total attributes.
+        """
+        stmt = (
+            select(
+                Category.id,
+                Category.name,
+                func.coalesce(func.sum(Transaction.amount), 0).label("total"),
+            )
+            .join(Category, Category.id == Transaction.category_id)
+            .where(
+                Transaction.user_id == user_id,
+                Transaction.type == tx_type,
+            )
+        )
+
+        if date_from is not None:
+            stmt = stmt.where(Transaction.transaction_date >= date_from)
+
+        if date_to is not None:
+            stmt = stmt.where(Transaction.transaction_date <= date_to)
+
+        stmt = stmt.group_by(Category.id, Category.name).order_by(
+            func.sum(Transaction.amount).desc()
+        )
+
+        return self.db.execute(stmt).all()

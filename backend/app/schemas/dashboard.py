@@ -3,8 +3,13 @@ from decimal import Decimal
 from pydantic import BaseModel
 
 from app.schemas.budget import BudgetProgressItem
-from app.schemas.report import CategoryBreakdownItem
 from app.schemas.transaction import TransactionResponse
+
+
+class CategoryBreakdownItem(BaseModel):
+    category_id: str
+    category_name: str
+    total: Decimal
 
 
 class DashboardSummaryResponse(BaseModel):
