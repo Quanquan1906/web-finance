@@ -105,7 +105,6 @@ export function QuickCreateTransactionDialog({
         note: "",
         suggested_category_name: result.category_suggestion ?? null,
         category_id: null,
-        confidence: 1,
       });
       setCategoryHint(result.category_suggestion);
       setStep("review");

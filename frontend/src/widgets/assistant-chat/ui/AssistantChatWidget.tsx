@@ -1,8 +1,7 @@
 import { MessageBubble } from '@/entities/assistant';
-import { useSpeechRecognition } from '@/shared/hooks/use-speech-recognition';
 import { Button } from '@/shared/ui/button';
 import { Textarea } from '@/shared/ui/textarea';
-import { Bot, Loader2, Mic, MicOff, RotateCcw, Send, Sparkles } from 'lucide-react';
+import { Bot, Loader2, RotateCcw, Send, Sparkles } from 'lucide-react';
 import { type FormEvent, useEffect } from 'react';
 import { useAssistantChat } from '../model/use-assistant-chat';
 
@@ -18,9 +17,6 @@ export function AssistantChatWidget() {
     handleReset,
   } = useAssistantChat();
 
-  const { error: speechError, isListening, isSupported, startListening, stopListening } =
-    useSpeechRecognition();
-
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, chatMutation.isPending, bottomRef]);
@@ -28,27 +24,6 @@ export function AssistantChatWidget() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     submitMessage(inputValue);
-  };
-
-  const handleResetWithSpeech = () => {
-    handleReset();
-    stopListening();
-  };
-
-  const handleVoiceInput = () => {
-    if (isListening) {
-      stopListening();
-      return;
-    }
-
-    startListening({
-      onResult: (transcript) => {
-        setInputValue((current) => {
-          const trimmedCurrent = current.trim();
-          return trimmedCurrent ? `${trimmedCurrent} ${transcript}` : transcript;
-        });
-      },
-    });
   };
 
   return (
@@ -96,7 +71,7 @@ export function AssistantChatWidget() {
           <Button
             type="button"
             variant="outline"
-            onClick={handleResetWithSpeech}
+            onClick={handleReset}
             className="shrink-0 rounded-xl bg-white shadow-sm"
           >
             <RotateCcw className="size-4" />
@@ -136,8 +111,6 @@ export function AssistantChatWidget() {
             ))}
           </div>
 
-          {speechError ? <p className="mb-2 text-xs text-red-600">{speechError}</p> : null}
-
           <form className="flex items-end gap-2 sm:gap-3" onSubmit={handleSubmit}>
             <Textarea
               value={inputValue}
@@ -153,20 +126,7 @@ export function AssistantChatWidget() {
               disabled={chatMutation.isPending}
             />
 
-            <Button
-              type="button"
-              variant="outline"
-              size="icon-lg"
-              className={`shrink-0 rounded-2xl bg-white shadow-sm ${
-                isListening ? 'border-red-200 bg-red-50 text-red-600 hover:bg-red-100' : ''
-              }`}
-              disabled={!isSupported || chatMutation.isPending}
-              onClick={handleVoiceInput}
-              title={isSupported ? 'Nhập bằng giọng nói' : 'Trình duyệt chưa hỗ trợ micro'}
-              aria-label={isListening ? 'Dừng nghe giọng nói' : 'Nhập bằng giọng nói'}
-            >
-              {isListening ? <MicOff className="size-4" /> : <Mic className="size-4" />}
-            </Button>
+          
 
             <Button
               type="submit"

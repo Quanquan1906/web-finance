@@ -5,7 +5,6 @@ export interface QuickTransactionSuggestion {
   note: string;
   suggested_category_name?: string | null;
   category_id?: string | null;
-  confidence: number;
 }
 
 export interface QuickTransactionParseRequest {

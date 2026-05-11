@@ -19,7 +19,7 @@ export function CreateTransactionDialog({
   open,
   onOpenChange,
 }: CreateTransactionDialogProps) {
-  const { mutateAsync, isPending } = useCreateTransaction();
+  const { mutateAsync, isPending } = useCreateTransaction();// mutateAsync is the function to cal appi
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const handleSubmit = async (values: TransactionFormValues) => {

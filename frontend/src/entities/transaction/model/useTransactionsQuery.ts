@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { dashboardQueryKeys } from '@/entities/dashboard';
 import { transactionApi } from '../api/transactionApi';
 import type { TransactionListParams } from './types';
+import { statisticsQueryKeys } from '@/entities/statistics';
 
 export const transactionQueryKeys = {
   all: ['transactions'] as const,
@@ -25,6 +26,7 @@ export function useCreateTransactionMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: statisticsQueryKeys.all });
     },
   });
 }
@@ -44,6 +46,7 @@ export function useUpdateTransactionMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: statisticsQueryKeys.all });
     },
   });
 }
@@ -57,6 +60,7 @@ export function useDeleteTransactionMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: transactionQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.all });
+      queryClient.invalidateQueries({ queryKey: statisticsQueryKeys.all });
     },
   });
 }

@@ -17,4 +17,3 @@ class QuickTransactionParseResponse(BaseModel):
     note: str
     suggested_category_name: str | None = None
     category_id: UUID | None = None
-    confidence: float = 0.0
